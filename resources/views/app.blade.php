@@ -45,3 +45,4 @@
         @inertia
     </body>
 </html>
+g
