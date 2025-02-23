@@ -27,6 +27,7 @@ export default function Login({ status, canResetPassword }) {
     // Fetch random image from the Laravel backend
     const fetchRandomImage = async () => {
         try {
+            console.log("Image credits to unsplash");  // Debug log
             const response = await fetch(route('api.random-image'));  // Call the server-side route
             const data = await response.json();
             setImageUrl(data.imageUrl);  // Update state with the fetched image URL
@@ -37,23 +38,21 @@ export default function Login({ status, canResetPassword }) {
         }
     };
 
-   // Trigger fetching the image after the page has loaded
-   useEffect(() => {
-        window.onload = () => {
-            fetchRandomImage();  // Fetch image after the page is fully loaded
-        };
+    // Trigger fetching the image after the page has loaded
+    useEffect(() => {
+        fetchRandomImage();  // Fetch image when the component mounts
     }, []);
 
     return (
         <>
             <Head title="Login" />
             <div className="tw-flex tw-flex-wrap tw-w-full">
-                <div className="tw-flex tw-flex-col tw-w-full md:tw-w-1/2">
+                <div className="tw-flex tw-flex-col tw-w-full lg:tw-w-1/2">
                     <div className="tw-flex tw-flex-col tw-justify-center tw-px-8 tw-pt-8 tw-my-auto md:tw-justify-center md:tw-pt-0 md:tw-px-24 lg:tw-px-32">
                         <p className="tw-text-3xl tw-text-center tw-justify-center">
-                            <a href={route('home')} className="tw-flex tw-w-full tw-justify-center tw-mb-3">
+                            <Link href={route('home')} className="tw-flex tw-w-full tw-justify-center tw-mb-3">
                                 <img src="/images/favicon.png" alt="Logo" width="20%" />
-                            </a>
+                            </Link>
                             <span className="tw-font-extrabold">Welcome Back!</span>
                         </p>
                         <form onSubmit={submit} className="tw-flex tw-flex-col tw-pt-3 md:tw-pt-8">
@@ -118,19 +117,17 @@ export default function Login({ status, canResetPassword }) {
                     </div>
                 </div>
 
-                <div className="tw-w-1/2 tw-shadow-2xl">
-                    {isLoading ? (
+                <div className="tw-w-full lg:tw-w-1/2 tw-shadow-2xl tw-hidden lg:tw-block tw-bg-cover tw-bg-center" style={{ backgroundImage: `url(${imageUrl})` }}>
+                    {isLoading && (
                         <div className="tw-flex tw-justify-center tw-items-center tw-w-full tw-h-screen">
                             <div className="spinner-border text-primary" role="status">
                                 <span className="visually-hidden">Loading...</span>
                             </div>
                             <div className="p tw-p-3">Loading something amazing!</div>
                         </div>
-                    ) : (
-                        <img className="tw-hidden tw-object-cover tw-w-full tw-h-screen md:tw-block" id="randomImage" src={imageUrl} alt="Random photo from Unsplash" />
                     )}
                     <div className="tw-absolute tw-bottom-0 tw-right-0 tw-p-4 tw-text-gray-200 tw-bg-opacity-50 tw-text-shadow-glow">
-                        Images from <a href="https://unsplash.com/" className="tw-underline">unsplash.com</a>
+                        Images from <Link href="https://unsplash.com/" className="tw-underline">unsplash.com</Link>
                         <span>Thank you photographers</span>
                     </div>
                 </div>

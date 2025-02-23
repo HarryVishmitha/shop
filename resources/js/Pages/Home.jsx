@@ -8,6 +8,7 @@ const Home = () => {
         <>
             <Head title="Home" />
             <Header />
+            hi
         </>
     );
 };

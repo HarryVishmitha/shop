@@ -26,10 +26,10 @@ export default function Register() {
     // Fetch random image from the Laravel backend
     const fetchRandomImage = async () => {
         try {
-            // console.log("Fetching image...");  // Debug log
-            const response = await fetch(route('api.random-image'));  // Call the server-side route
+            console.log("Fetching from URL:", (route('api.random-image')));  // Debug log
+            // Fetching image from the server-side route
+            const response = await fetch(route('api.random-image'));
             const data = await response.json();
-            // console.log("Fetched image data:", data);  // Debug log
             setImageUrl(data.imageUrl);  // Update state with the fetched image URL
         } catch (error) {
             console.error("Error fetching image:", error);
@@ -130,16 +130,14 @@ export default function Register() {
                     </div>
                 </div>
 
-                <div className="tw-w-full lg:tw-w-1/2 tw-shadow-2xl tw-hidden lg:tw-block">
-                    {isLoading ? (
+                <div className="tw-w-full lg:tw-w-1/2 tw-shadow-2xl tw-bg-cover tw-bg-center" style={{ backgroundImage: `url(${imageUrl})` }}>
+                    {isLoading && (
                         <div className="tw-flex tw-justify-center tw-items-center tw-w-full tw-h-screen">
                             <div className="spinner-border text-primary" role="status">
                                 <span className="visually-hidden">Loading...</span>
                             </div>
                             <div className="p tw-p-3">Loading something amazing!</div>
                         </div>
-                    ) : (
-                        <img className="tw-hidden tw-object-cover tw-w-full tw-h-screen md:tw-block" id="randomImage" src={imageUrl} alt="Random photo from Unsplash" />
                     )}
                     <div className="tw-absolute tw-bottom-0 tw-right-0 tw-p-4 tw-text-gray-200 tw-bg-opacity-50 tw-text-shadow-glow">
                         Images from <a href="https://unsplash.com/" className="tw-underline">unsplash.com</a>
