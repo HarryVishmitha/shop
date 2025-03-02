@@ -1,13 +1,15 @@
 import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Head, Link, useForm } from '@inertiajs/react';
 import React, { useEffect, useState } from 'react';
+import InputLabel from '@/Components/InputLabel';
 
 export default function Register() {
     const [imageUrl, setImageUrl] = useState(null);
     const [isLoading, setIsLoading] = useState(true); // Track loading state
+    const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -90,7 +92,7 @@ export default function Register() {
                                 <InputLabel htmlFor="password" value="Password" />
                                 <TextInput
                                     id="password"
-                                    type="password"
+                                    type={showPassword ? 'text' : 'password'} // Toggle password visibility
                                     name="password"
                                     value={data.password}
                                     className="tw-mt-1 tw-block tw-w-full tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-shadow-sm focus:tw-ring-indigo-500 focus:tw-border-indigo-500"
@@ -105,7 +107,7 @@ export default function Register() {
                                 <InputLabel htmlFor="password_confirmation" value="Confirm Password" />
                                 <TextInput
                                     id="password_confirmation"
-                                    type="password"
+                                    type={showPassword ? 'text' : 'password'} // Toggle password visibility
                                     name="password_confirmation"
                                     value={data.password_confirmation}
                                     className="tw-mt-1 tw-block tw-w-full tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-shadow-sm focus:tw-ring-indigo-500 focus:tw-border-indigo-500"
@@ -114,6 +116,18 @@ export default function Register() {
                                     required
                                 />
                                 <InputError message={errors.password_confirmation} className="tw-mt-2" />
+                            </div>
+
+                            {/* Show Password Checkbox */}
+                            <div className="tw-flex tw-items-center tw-mb-4">
+                                <input
+                                    type="checkbox"
+                                    id="show_password"
+                                    className="tw-mr-2"
+                                    checked={showPassword}
+                                    onChange={() => setShowPassword(!showPassword)} // Toggle the state when clicked
+                                />
+                                <label htmlFor="show_password" className="tw-text-sm tw-text-gray-600">Show Passwords</label>
                             </div>
 
                             <div className="tw-flex tw-items-center tw-justify-between tw-mb-1">

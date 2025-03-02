@@ -6,3 +6,6 @@
 body {
     font-family: 'Be Vietnam Pro', sans-serif;
 }
+.no-dropdown-triangle::after {
+    display: none;
+}

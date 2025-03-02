@@ -57,7 +57,7 @@ export default function Login({ status, canResetPassword }) {
                         </p>
                         <form onSubmit={submit} className="tw-flex tw-flex-col tw-pt-3 md:tw-pt-8">
                             <div className="tw-flex tw-flex-col tw-pt-4">
-                                <InputLabel htmlFor="email" value="Email Address" />
+                                <InputLabel htmlFor="email" value="Email Address"/>
                                 <TextInput
                                     id="email"
                                     type="email"

@@ -1,7 +1,9 @@
 import React from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 
 const Header = () => {
+    const { auth } = usePage().props;  // Destructure the auth data from the page props
+
     return (
         <header className="tw-bg-white tw-shadow-md tw-py-4">
             <div className="tw-container tw-mx-auto tw-flex tw-justify-between tw-items-center tw-px-3 tw-pb-4">
@@ -22,9 +24,16 @@ const Header = () => {
                         <span className="tw-absolute tw-w-5 tw-h-5 tw-text-center tw-align-middle tw-p-1 tw-text-xs tw-bg-red-500 tw-rounded-full tw--right-3 tw--top-3.5 tw-text-white tw-leading">5</span>
                         <i className="fa-solid fa-cart-shopping"></i> Cart
                     </Link>
-                    <Link href={route('login')} className="tw-text-gray-400 hover:tw-text-[#f44032] tw-text-[17px]">
-                        <i className="fas fa-user"></i> Login
-                    </Link>
+                    {/* Conditionally show login or dashboard link */}
+                    {!auth.user ? (
+                        <Link href={route('login')} className="tw-text-gray-400 hover:tw-text-[#f44032] tw-text-[17px]">
+                            <i className="fas fa-user"></i> Login
+                        </Link>
+                    ) : (
+                        <Link href={route('dashboard')} className="tw-text-gray-400 hover:tw-text-[#f44032] tw-text-[17px]">
+                            <i className="fas fa-tachometer-alt"></i> Dashboard
+                        </Link>
+                    )}
                 </div>
             </div>
             <hr />

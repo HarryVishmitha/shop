@@ -19,42 +19,42 @@ export default function Modal({
     };
 
     const maxWidthClass = {
-        sm: 'sm:max-w-sm',
-        md: 'sm:max-w-md',
-        lg: 'sm:max-w-lg',
-        xl: 'sm:max-w-xl',
-        '2xl': 'sm:max-w-2xl',
+        sm: 'tw-sm:tw-max-w-sm',
+        md: 'tw-sm:tw-max-w-md',
+        lg: 'tw-sm:tw-max-w-lg',
+        xl: 'tw-sm:tw-max-w-xl',
+        '2xl': 'tw-sm:tw-max-w-2xl',
     }[maxWidth];
 
     return (
-        <Transition show={show} leave="duration-200">
+        <Transition show={show} leave="tw-duration-200">
             <Dialog
                 as="div"
                 id="modal"
-                className="fixed inset-0 z-50 flex transform items-center overflow-y-auto px-4 py-6 transition-all sm:px-0"
+                className="tw-fixed tw-inset-0 tw-z-50 tw-flex tw-transform tw-items-center tw-overflow-y-auto tw-px-4 tw-py-6 tw-transition-all tw-sm:tw-px-0"
                 onClose={close}
             >
                 <TransitionChild
-                    enter="ease-out duration-300"
-                    enterFrom="opacity-0"
-                    enterTo="opacity-100"
-                    leave="ease-in duration-200"
-                    leaveFrom="opacity-100"
-                    leaveTo="opacity-0"
+                    enter="tw-ease-out tw-duration-300"
+                    enterFrom="tw-opacity-0"
+                    enterTo="tw-opacity-100"
+                    leave="tw-ease-in tw-duration-200"
+                    leaveFrom="tw-opacity-100"
+                    leaveTo="tw-opacity-0"
                 >
-                    <div className="absolute inset-0 bg-gray-500/75 dark:bg-gray-900/75" />
+                    <div className="tw-absolute tw-inset-0 tw-bg-gray-500/75 tw-dark:tw-bg-gray-900/75" />
                 </TransitionChild>
 
                 <TransitionChild
-                    enter="ease-out duration-300"
-                    enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    enterTo="opacity-100 translate-y-0 sm:scale-100"
-                    leave="ease-in duration-200"
-                    leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-                    leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    enter="tw-ease-out tw-duration-300"
+                    enterFrom="tw-opacity-0 tw-translate-y-4 tw-sm:tw-translate-y-0 tw-sm:tw-scale-95"
+                    enterTo="tw-opacity-100 tw-translate-y-0 tw-sm:tw-scale-100"
+                    leave="tw-ease-in tw-duration-200"
+                    leaveFrom="tw-opacity-100 tw-translate-y-0 tw-sm:tw-scale-100"
+                    leaveTo="tw-opacity-0 tw-translate-y-4 tw-sm:tw-translate-y-0 tw-sm:tw-scale-95"
                 >
                     <DialogPanel
-                        className={`mb-6 transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:mx-auto sm:w-full dark:bg-gray-800 ${maxWidthClass}`}
+                        className={`tw-mb-6 tw-transform tw-overflow-hidden tw-rounded-lg tw-bg-white tw-shadow-xl tw-transition-all tw-sm:tw-mx-auto tw-sm:tw-w-full tw-dark:tw-bg-gray-800 ${maxWidthClass}`}
                     >
                         {children}
                     </DialogPanel>

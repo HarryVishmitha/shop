@@ -8,29 +8,29 @@ export default function Edit({ mustVerifyEmail, status }) {
     return (
         <AuthenticatedLayout
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+                <h2 className="tw-text-xl tw-font-semibold tw-leading-tight tw-text-gray-800 dark:tw-text-gray-200">
                     Profile
                 </h2>
             }
         >
             <Head title="Profile" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8 dark:bg-gray-800">
+            <div className="tw-py-12">
+                <div className="tw-mx-auto tw-max-w-7xl tw-space-y-6 sm:tw-px-6 lg:tw-px-8">
+                    <div className="tw-bg-white tw-p-4 tw-shadow sm:tw-rounded-lg sm:tw-p-8 dark:tw-bg-gray-800">
                         <UpdateProfileInformationForm
                             mustVerifyEmail={mustVerifyEmail}
                             status={status}
-                            className="max-w-xl"
+                            className="tw-max-w-xl"
                         />
                     </div>
 
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8 dark:bg-gray-800">
-                        <UpdatePasswordForm className="max-w-xl" />
+                    <div className="tw-bg-white tw-p-4 tw-shadow sm:tw-rounded-lg sm:tw-p-8 dark:tw-bg-gray-800">
+                        <UpdatePasswordForm className="tw-max-w-xl" />
                     </div>
 
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8 dark:bg-gray-800">
-                        <DeleteUserForm className="max-w-xl" />
+                    <div className="tw-bg-white tw-p-4 tw-shadow sm:tw-rounded-lg sm:tw-p-8 dark:tw-bg-gray-800">
+                        <DeleteUserForm className="tw-max-w-xl" />
                     </div>
                 </div>
             </div>

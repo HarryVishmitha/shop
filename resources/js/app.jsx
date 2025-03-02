@@ -1,5 +1,25 @@
 import '../css/app.css';
 import './bootstrap';
+// import '../css/style.css';
+// import '../css/style_2.css';
+// import '../css/remixicon.css';
+// import '../css/extra.css';
+// import '../css/lib/animate.min.css';
+// import '../css/lib/apexcharts.css';
+// import '../css/lib/audioplayer.css';
+// import '../css/lib/bootstrap.min.css';
+// import '../css/lib/dataTables.min.css';
+// import '../css/lib/editor-katex.min.css';
+// import '../css/lib/editor.atom-one-dark.min.css';
+// import '../css/lib/editor.quill.snow.css';
+// import '../css/lib/file-upload.css';
+// import '../css/lib/flatpickr.min.css';
+// import '../css/lib/full-calendar.css';
+// import '../css/lib/jquery-jvectormap-2.0.5.css';
+// import '../css/lib/magnific-popup.css';
+// import '../css/lib/prism.css';
+// import '../css/lib/slick.css';
+// import '../css/lib/slick.css';
 
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
@@ -23,7 +43,7 @@ createInertiaApp({
         createRoot(el).render(<App {...props} />);
     },
     progress: {
-        color: '#4B5563',
+        color: '#f44032',
     },
 }).then(() => {
     document.getElementById('app').removeAttribute('data-page');
