@@ -8,8 +8,14 @@ const sidebarLinks = [
     {
         label: 'Dashboard',
         icon: 'bi:house-door',
-        route: route('dashboard'),  // Replace with actual route name
+        route: route('admin.dashboard'),  // Replace with actual route name
         id: 'dashboard'
+    },
+    {
+        label: 'Users',
+        icon: 'bi:people',
+        route: route('admin.users'),
+        id: 'users'
     },
 ];
 
@@ -52,12 +58,14 @@ const AdminHeader = ({ children }) => {
                 <div className="tw-px-4">
                     {/* Sidebar Links */}
                     {sidebarLinks.map(link => (
-                        <div key={link.id} className="tw-py-3 tw-cursor-pointer">
-                            <div className="tw-flex tw-items-center">
-                                <Icon icon={link.icon} className="tw-text-2xl tw-mr-4" />
-                                {!sidebarCollapsed && <span className="tw-text-sm">{link.label}</span>}
+                        <Link href={link.route} key={link.id}>
+                            <div key={link.id} className="tw-py-3 tw-cursor-pointer">
+                                <div className="tw-flex tw-items-center">
+                                    <Icon icon={link.icon} className="tw-text-2xl tw-mr-4" />
+                                    {!sidebarCollapsed && <span className="tw-text-sm">{link.label}</span>}
+                                </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             </div>
