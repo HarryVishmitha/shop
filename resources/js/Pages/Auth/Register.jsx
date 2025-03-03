@@ -49,7 +49,7 @@ export default function Register() {
         <>
             <Head title="Register" />
             <div className="tw-flex tw-flex-wrap tw-w-full">
-                <div className="tw-flex lg:tw-w-1/2 tw-flex-col tw-w-full">
+                <div className="tw-flex lg:tw-w-1/2 tw-flex-col tw-w-full tw-h-screen">
                     <div className="tw-flex tw-flex-col tw-justify-center tw-px-5 tw-pt-4 tw-my-auto md:tw-justify-center md:tw-pt-0 md:tw-px-24 lg:tw-px-32">
                         <p className="tw-text-3xl tw-text-center tw-justify-center">
                             <a href={route('home')} className="tw-flex tw-w-full tw-justify-center tw-mb-2 tw-mt-1">

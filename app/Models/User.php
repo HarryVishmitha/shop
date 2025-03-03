@@ -16,6 +16,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'working_group_id',  // New field
+        'status',             // New field
     ];
 
     protected $hidden = [
@@ -28,6 +30,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'working_group_id' => 'integer', // Ensure it's cast as an integer
+            'status' => 'string', 
         ];
     }
 
@@ -43,5 +47,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function role()
     {
         return $this->belongsTo(Role::class);
+    }
+
+    /**
+     * Define the relationship with the WorkingGroup model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function workingGroup()
+    {
+        return $this->belongsTo(WorkingGroup::class);
     }
 }

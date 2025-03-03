@@ -47,7 +47,7 @@ export default function Login({ status, canResetPassword }) {
         <>
             <Head title="Login" />
             <div className="tw-flex tw-flex-wrap tw-w-full">
-                <div className="tw-flex tw-flex-col tw-w-full lg:tw-w-1/2">
+                <div className="tw-flex tw-flex-col tw-w-full lg:tw-w-1/2 tw-h-screen">
                     <div className="tw-flex tw-flex-col tw-justify-center tw-px-8 tw-pt-8 tw-my-auto md:tw-justify-center md:tw-pt-0 md:tw-px-24 lg:tw-px-32">
                         <p className="tw-text-3xl tw-text-center tw-justify-center">
                             <Link href={route('home')} className="tw-flex tw-w-full tw-justify-center tw-mb-3">

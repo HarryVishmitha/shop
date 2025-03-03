@@ -19,6 +19,11 @@ class AdminController extends Controller
     }
 
     public function index() {
-        return Inertia::render('admin/dashboard');
+        // Get total number of users
+        $totalUsers = User::count();
+
+        return Inertia::render('admin/dashboard', [
+            'totalUsers' => $totalUsers
+        ]);
     }
 }
