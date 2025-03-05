@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
 
 const ThemeToggleButton = () => {
     // 1. Initialize state for the current theme
@@ -25,6 +26,8 @@ const ThemeToggleButton = () => {
         setTheme(newTheme);
         localStorage.setItem('theme', newTheme);
         updateThemeOnHtmlEl(newTheme);
+        Cookies.set('theme', newTheme, { expires: 365 });
+
     };
 
     return (

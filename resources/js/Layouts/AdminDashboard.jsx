@@ -11,14 +11,39 @@ const AdminDashboard = ({ children }) => {
     let [mobileMenu, setMobileMenu] = useState(false);
     const location = useLocation(); // Hook to get the current route
     const currentYear = new Date().getFullYear(); // Get the current year
+    const [theme, setTheme] = useState('light'); // Initialize theme state
 
     useEffect(() => {
+
+        const themeFromCookie = Cookies.get('theme');
+        console.log(themeFromCookie);
         const sidebarstatus = Cookies.get('sidebarActive');
         if (sidebarstatus === 'active') {
             seSidebarActive(true);
         } else {
             seSidebarActive(false);
         }
+
+        if (themeFromCookie) {
+            setTheme(themeFromCookie); // Update state from cookie
+        } else {
+            // Fallback to localStorage if cookie is not set
+            const storedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(storedTheme);
+        }
+
+        // Apply the theme on the HTML element
+        const updateThemeOnHtmlEl = (theme) => {
+            document.documentElement.setAttribute('data-theme', theme);
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        };
+
+        updateThemeOnHtmlEl(themeFromCookie); // Update the theme on page load
 
         const handleDropdownClick = (event) => {
         event.preventDefault();
@@ -127,7 +152,7 @@ const AdminDashboard = ({ children }) => {
                 <Icon icon='radix-icons:cross-2' />
                 </button>
                 <div>
-                <a href='/' className='sidebar-logo'>
+                <Link href='/' className='sidebar-logo'>
                     <img
                     src='/assets/images/logo.png'
                     alt='site logo'
@@ -143,7 +168,7 @@ const AdminDashboard = ({ children }) => {
                     alt='site logo'
                     className='logo-icon'
                     />
-                </a>
+                </Link>
                 </div>
                 <div className='sidebar-menu-area'>
                 <ul className='sidebar-menu' id='sidebar-menu'>
