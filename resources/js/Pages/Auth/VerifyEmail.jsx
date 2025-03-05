@@ -22,7 +22,7 @@ export default function VerifyEmail({ status }) {
                                 <Link href={route('home')} className="tw-flex tw-w-full tw-justify-center tw-mb-3">
                                     <img src="/images/favicon.png" alt="Logo" width="20%" />
                                 </Link>
-                                <h1 className="tw-block tw-text-2xl tw-font-bold tw-text-gray-800">Verify Your Email Address</h1>
+                                <h4 className="tw-block tw-text tw-font-bold tw-text-gray-800">Verify Your Email Address</h4>
                                 <p className="tw-mt-2 tw-text-sm tw-text-gray-600 dark:tw-text-gray-400">
                                     Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn't receive the email, we will gladly send you another.
                                 </p>
@@ -33,12 +33,12 @@ export default function VerifyEmail({ status }) {
                                 )}
                                 <div className="tw-mt-4 tw-flex tw-items-center tw-justify-between">
                                     <form onSubmit={submit}>
-                                        <button className='tw-w-full tw-bg-black tw-px-2 tw-text-white tw-py-2 tw-rounded-md tw-shadow-md hover:tw-bg-white hover:tw-text-black focus:tw-outline-none focus:tw-ring-2 tw-border-[3px] tw-border-black' disabled={processing}>
+                                        <button className='btn btn-outline-dark' disabled={processing}>
                                             Resend Verification Email
                                         </button>
                                     </form>
                                     <form method="post" action={route('logout')}>
-                                        <button type="submit" className="tw-outline p-2 tw-text-sm hover:tw-text-blue-600  tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2 focus:tw-ring-indigo-500">
+                                        <button type="submit" className="btn btn-outline-danger">
                                             Log Out
                                         </button>
                                     </form>
