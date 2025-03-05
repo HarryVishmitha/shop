@@ -8,7 +8,9 @@ const Home = () => {
         <>
             <Head title="Home" />
             <Header />
-            hi
+            <div className="tw-bg-blue-500" style={{ height: '900px' }}>
+                hi
+            </div>
         </>
     );
 };

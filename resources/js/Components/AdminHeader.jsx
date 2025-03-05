@@ -50,9 +50,11 @@ const AdminHeader = ({ children }) => {
             {/* Sidebar for medium and larger screens */}
             <div className={`tw-bg-gray-800 tw-text-white ${sidebarCollapsed ? 'tw-w-20' : 'tw-w-64'} tw-transition-all tw-hidden md:tw-block tw-border-r-2`}>
                 <div className="tw-p-4 tw-flex tw-items-center tw-justify-center">
-                    {/* Logo Sidebar */}
-                    <img src="/favicon.ico" alt="Logo" className="tw-h-10 tw-hidden md:tw-block" />
-                    {!sidebarCollapsed && <span className="tw-text-xl tw-font-semibold tw-ms-1">Printair</span>}
+                    <Link href={route('home')} className='tw-flex tw-items-center tw-justify-center'>
+                        {/* Logo Sidebar */}
+                        <img src="/favicon.ico" alt="Logo" className="tw-h-10 tw-hidden md:tw-block" />
+                        {!sidebarCollapsed && <span className="tw-text-xl tw-font-semibold tw-ms-1">Printair</span>}
+                    </Link>
                 </div>
                 <hr className="tw-border-t-2 tw-border-gray-400" />
                 <div className="tw-px-4">
@@ -109,7 +111,7 @@ const AdminHeader = ({ children }) => {
                         <button onClick={toggleSidebar} className=" tw-p-2 tw-text-white tw-hidden md:tw-block">
                             <Icon icon={sidebarCollapsed ? 'heroicons-solid:menu-alt-2' : 'heroicons-solid:menu-alt-1'} width="25" height="25" />
                         </button>
-                        <span className="tw-ml-4 tw-text-xl">Admin Panel</span>
+                        <span className="tw-ml-4 tw-text-xl tw-font-medium">Admin Panel</span>
                     </div>
                     <div className="tw-flex tw-items-center">
                         <button className="tw-ml-4 tw-px-1 tw-py-1 tw-rounded-full tw-text-white">
