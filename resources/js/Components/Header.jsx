@@ -5,7 +5,7 @@ const Header = () => {
     const { auth } = usePage().props;  // Destructure the auth data from the page props
 
     return (
-        <header className="tw-bg-white tw-shadow-md tw-py-4">
+        <header className="tw-bg-white tw-shadow-md tw-py-4 tw-sticky tw-top-0">
             <div className="tw-container tw-mx-auto tw-flex tw-justify-between tw-items-center tw-px-3 tw-pb-4">
                 {/* Right Side */}
                 <Link href="/">
@@ -51,7 +51,6 @@ const Header = () => {
                 </div>
             </div>
         </header>
-
     );
 };
 

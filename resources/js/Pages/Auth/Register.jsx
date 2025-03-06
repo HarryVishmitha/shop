@@ -49,7 +49,7 @@ export default function Register() {
         <>
             <Head title="Register" />
             <div className="tw-flex tw-flex-wrap tw-w-full">
-                <div className="tw-flex lg:tw-w-1/2 tw-flex-col tw-w-full tw-h-screen">
+                <div className="tw-flex lg:tw-w-1/2 tw-flex-col tw-w-full tw-h-screen min-vh-100">
                     <div className="tw-flex tw-flex-col tw-justify-center tw-px-5 tw-pt-4 tw-my-auto md:tw-justify-center md:tw-pt-0 md:tw-px-24 lg:tw-px-32">
                         <p className="tw-text-3xl tw-text-center tw-justify-center">
                             <a href={route('home')} className="tw-flex tw-w-full tw-justify-center tw-mb-2 tw-mt-1">
@@ -58,7 +58,7 @@ export default function Register() {
                             <span className="tw-font-extrabold">Let's work together!</span>
                         </p>
                         <form onSubmit={submit} className="tw-flex tw-flex-col md:tw-pt-7">
-                            <div className="tw-flex tw-flex-col tw-pt-4">
+                            <div className="tw-flex tw-flex-col mt-3">
                                 <InputLabel htmlFor="name" value="Name" />
                                 <TextInput
                                     id="name"
@@ -73,7 +73,7 @@ export default function Register() {
                                 <InputError message={errors.name} className="tw-mt-2" />
                             </div>
 
-                            <div className="tw-flex tw-flex-col tw-pt-4">
+                            <div className="tw-flex tw-flex-col mt-3">
                                 <InputLabel htmlFor="email" value="Email Address" />
                                 <TextInput
                                     id="email"
@@ -88,7 +88,7 @@ export default function Register() {
                                 <InputError message={errors.email} className="tw-mt-2" />
                             </div>
 
-                            <div className="tw-flex tw-flex-col tw-pt-4">
+                            <div className="tw-flex tw-flex-col mt-4">
                                 <InputLabel htmlFor="password" value="Password" />
                                 <TextInput
                                     id="password"
@@ -119,7 +119,7 @@ export default function Register() {
                             </div>
 
                             {/* Show Password Checkbox */}
-                            <div className="tw-flex tw-items-center tw-mb-4">
+                            <div className="tw-flex tw-items-center tw-mb-3">
                                 <input
                                     type="checkbox"
                                     id="show_password"
@@ -131,7 +131,7 @@ export default function Register() {
                             </div>
 
                             <div className="tw-flex tw-items-center tw-justify-between tw-mb-1">
-                                <button className="tw-w-full tw-bg-black tw-text-white tw-py-2 tw-rounded-md tw-shadow-md hover:tw-bg-white hover:tw-text-black focus:tw-outline-none focus:tw-ring-2 tw-border-[3px] tw-border-black" disabled={processing}>
+                                <button className="btn btn-outline-dark radius-8 px-20 py-11 d-flex align-items-center justify-content-center gap-2 tw-w-full tw-text-center" disabled={processing}>
                                     Register
                                 </button>
                             </div>
