@@ -36,8 +36,9 @@ class AdminController extends Controller
             'dailyCustomers' => $dailyCustomers
         ]);
     }
-    public function users() {
-        $users = User::all();
+    public function users(Request $request) {
+        $perPage = $request->input('perPage', 10);
+        $users = User::with(['role', 'workingGroup'])->paginate($perPage);
         return Inertia::render('admin/users', [
             'users' => $users
         ]);

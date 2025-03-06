@@ -98,7 +98,7 @@ const AdminHeader = ({ children }) => {
             </div>
 
             {/* Main Content Area */}
-            <div className="tw-flex-1 tw-bg-blue-50 tw-flex tw-flex-col">
+            <div className="tw-flex-1 tw-bg-blue-50 tw-flex tw-flex-col tw-h-screen">
                 {/* Top Navbar */}
                 <div className="tw-flex tw-items-center tw-justify-between tw-bg-red-600 tw-px-4 tw-py-4 tw-text-white">
                     <div className="tw-flex tw-items-center">
