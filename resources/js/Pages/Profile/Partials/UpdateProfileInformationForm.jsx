@@ -27,9 +27,9 @@ export default function UpdateProfileInformation({
     return (
         <section className={className}>
             <header>
-                <h2 className="tw-text-lg tw-font-medium tw-text-gray-900 dark:tw-text-gray-100">
+                <h4 className="tw-text-lg tw-font-medium tw-text-gray-900 dark:tw-text-gray-100 mb-3">
                     Profile Information
-                </h2>
+                </h4>
 
                 <p className="tw-mt-1 tw-text-sm tw-text-gray-600 dark:tw-text-gray-400">
                     Update your account's profile information and email address.

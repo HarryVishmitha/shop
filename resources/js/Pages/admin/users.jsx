@@ -1,138 +1,235 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import AdminHeader from '../../Components/AdminHeader';
 import AdminNav from '@/Components/AdminNav';
 import CookiesV from '@/Components/CookieConsent';
 import { Icon } from "@iconify/react";
-import { useState, useEffect } from 'react';
+import AdminDashboard from '../../Layouts/AdminDashboard';
+import Breadcrumb from "@/components/Breadcrumb";
 
-
-const Users = ({ users }) => {
+const Users = ({ users, userDetails, status: selectedStatus }) => {
     // Get the perPage value from the URL or default to 10
     const queryParams = new URLSearchParams(window.location.search);
     const initialPerPage = queryParams.get('perPage') || 10; // Default to 10 if not set in the URL
+    const [perPage, setPerPage] = useState(initialPerPage);
+    const [search, setSearch] = useState(''); // State for search input
+    const [status, setStatus] = useState(selectedStatus || ''); // State for status filter
 
-    const [perPage, setPerPage] = useState(initialPerPage); // Store selected perPage
     const breadcrumbs = [
         { label: 'Home', url: route('home'), icon: 'fluent:home-48-regular' },
         { label: 'Admin Dashboard', url: route('admin.dashboard'), icon: null },
         { label: 'Users', url: '', icon: null },
     ];
-    // Handle per page shower
+
+    // Handle per page change
     const handlePerPageChange = (event) => {
         const value = event.target.value;
         setPerPage(value); // Update perPage state
         // Update URL with the new perPage value and reload the page
-        window.location.href = `${users.path}?page=${users.current_page}&perPage=${value}`;
+        window.location.href = `${users.path}?page=${users.current_page}&perPage=${value}&status=${status}`;
+    };
+
+    // Handle search change
+    const handleSearchChange = (event) => {
+        setSearch(event.target.value);
+        // Optionally, you could implement filtering by search term here.
+    };
+
+    // Handle status filter change
+    const handleStatusChange = (event) => {
+        setStatus(event.target.value);
+        // Update the URL with the selected status and reload the page
+        window.location.href = `${users.path}?page=${users.current_page}&perPage=${perPage}&status=${event.target.value}`;
     };
 
     useEffect(() => {
         // Sync state with URL in case perPage is changed manually
         const queryParams = new URLSearchParams(window.location.search);
         const pagePerPage = queryParams.get('perPage');
+        const pageStatus = queryParams.get('status');
         if (pagePerPage) {
             setPerPage(pagePerPage);
         }
+        if (pageStatus) {
+            setStatus(pageStatus);
+        }
     }, [users.path]);
-
 
     return (
         <>
             <Head title="Admin Dashboard" />
-            <AdminHeader>
-                <AdminNav breadcrumbs={breadcrumbs} />
-                <div className="container-fluid tw-mt-3">
-                    <div className="tw-bg-white tw-rounded-md tw-shadow tw-p-2">
-                        <div className="d-flex justify-content-between tw-px-5 align-items-center tw-mb-4">
-                            <div className='buttonsGroups1'>
-                                <button className="btn btn-outline-primary d-flex justify-content-center align-items-center hover:tw-font-medium tw-py-4 tw-text-lg tw-mt-3" >
-                                    <Icon icon='mingcute:user-add-fill' className='tw-mr-1 tw-w-5 tw-h-5'/>
-                                    Add User
-                                    <Icon icon="line-md:arrow-right" className='tw-ms-1'/>
-                                </button>
-                            </div>
-                            <div>
-                                <select id="perPage" value={perPage} onChange={handlePerPageChange} className="form-select">
-                                    <option value={5}>5</option>
-                                    <option value={10}>10</option>
-                                    <option value={15}>15</option>
-                                    <option value={20}>20</option>
-                                    <option value={50}>50</option>
-                                    <option value={100}>100</option>
-                                </select>
-                            </div>
+            <AdminDashboard userDetails={userDetails}>
+                <Breadcrumb title="All Users" />
+                <div className="card h-100 p-0 radius-12">
+                    <div className="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
+                        <div className="d-flex align-items-center flex-wrap gap-3">
+                            <span className="text-md fw-medium text-secondary-light mb-0">Show</span>
+                            <select
+                                className="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px"
+                                value={perPage}
+                                onChange={handlePerPageChange}
+                            >
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+
+                            <form className="navbar-search">
+                                <input
+                                    type="text"
+                                    className="bg-base h-40-px w-auto"
+                                    name="search"
+                                    placeholder="Search"
+                                    value={search}
+                                    onChange={handleSearchChange}
+                                />
+                                <Icon icon="ion:search-outline" className="icon" />
+                            </form>
+
+                            <select
+                                className="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px"
+                                value={status}
+                                onChange={handleStatusChange}
+                            >
+                                <option value="" disabled>Select Status</option>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
                         </div>
-                        <hr className='tw-mb-3' />
-                        <div className="container-fluid">
-                            <table className="table table-hover">
+                        <Link
+                            to="/add-user"
+                            className="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2"
+                        >
+                            <Icon icon="ic:baseline-plus" className="icon text-xl line-height-1" />
+                            Add New User
+                        </Link>
+                    </div>
+
+                    <div className="card-body p-24">
+                        <div className="table-responsive scroll-sm">
+                            <table className="table bordered-table sm-table mb-0">
                                 <thead>
                                     <tr>
+                                        <th scope="col">
+                                            <div className="d-flex align-items-center gap-10">
+                                                <div className="form-check style-check d-flex align-items-center">
+                                                    <input
+                                                        className="form-check-input radius-4 border input-form-dark"
+                                                        type="checkbox"
+                                                        name="checkbox"
+                                                        id="selectAll"
+                                                    />
+                                                </div>
+                                                S.L
+                                            </div>
+                                        </th>
+                                        <th scope="col">Join Date</th>
                                         <th scope="col">Name</th>
                                         <th scope="col">Email</th>
-                                        <th scope="col">Role</th>
-                                        <th scope="col">Working Group</th>
-                                        <th scope="col">Status</th>
-                                        <th scope="col">Action</th>
+                                        <th scope="col" className="text-center">Status</th>
+                                        <th scope="col" className="text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {users.data.map((user, index) => (
-                                        <tr key={index}>
+                                        <tr key={user.id}>
                                             <td>
-                                                <div className="d-flex align-items-center">
-                                                    {user.name}
-                                                    {user.email_verified_at && (
-                                                        <Icon icon='material-symbols:verified-rounded' className='tw-ms-1 tw-text-blue-500'/>
-                                                    )}
+                                                <div className="d-flex align-items-center gap-10">
+                                                    <div className="form-check style-check d-flex align-items-center">
+                                                        <input
+                                                            className="form-check-input radius-4 border border-neutral-400"
+                                                            type="checkbox"
+                                                            name="checkbox"
+                                                        />
+                                                    </div>
+                                                    {index + 1}
                                                 </div>
                                             </td>
-                                            <td>{user.email}</td>
-                                            <td>{user.role.name}</td>
-                                            <td>{user.working_group ? user.working_group.name : '-'}</td>
+                                            <td>{new Date(user.created_at).toLocaleDateString()}</td>
                                             <td>
-                                               <span className={`${user.status === 'active' ? 'tw-text-green-500' : ''} ${user.status === 'inactive' ? 'tw-text-yellow-500' : ''} ${user.status === 'suspended' ? 'tw-text-red-500' : ''}`}> {user.status} </span>
+                                                <div className="d-flex align-items-center">
+                                                    <img
+                                                        src={user.profile_picture || '/assets/images/user.png'}
+                                                        alt={user.name}
+                                                        className="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden"
+                                                    />
+                                                    <div className="flex-grow-1">
+                                                        <span className="text-md mb-0 fw-normal text-secondary-light">{user.name}</span>
+                                                    </div>
+                                                </div>
                                             </td>
-                                            <td>
-                                                <button className="btn btn-sm hover:tw-text-white hover:tw-bg-green-500 tw-rounded-full tw-text-green-500 tw-me-2">
-                                                    <Icon icon="mdi:eye-outline" width={20} height={20}/>
-                                                </button>
-                                                <button className="btn btn-sm hover:tw-text-white hover:tw-bg-blue-500 tw-rounded-full tw-text-blue-500">
-                                                    <Icon icon="ph:pencil-fill" width={20} height={20} />
-                                                </button>
-                                                <button className="btn btn-sm hover:tw-text-white hover:tw-bg-red-500 tw-rounded-full tw-text-red-500">
-                                                    <Icon icon="flowbite:trash-bin-outline" width={20} height={20} />
-                                                </button>
+                                            <td><span className="text-md mb-0 fw-normal text-secondary-light">{user.email}</span></td>
+                                            <td className="text-center">
+                                                <span className={`bg-${user.status === 'active' ? 'success' : 'neutral'}-focus text-${user.status === 'active' ? 'success' : 'neutral'}-600 border border-${user.status === 'active' ? 'success' : 'neutral'}-main px-24 py-4 radius-4 fw-medium text-sm`}>
+                                                    {user.status}
+                                                </span>
+                                            </td>
+                                            <td className="text-center">
+                                                <div className="d-flex align-items-center gap-10 justify-content-center">
+                                                    <button
+                                                        type="button"
+                                                        className="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
+                                                    >
+                                                        <Icon icon="majesticons:eye-line" className="icon text-xl" />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="bg-success-focus text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
+                                                    >
+                                                        <Icon icon="lucide:edit" className="menu-icon" />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="remove-item-btn bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
+                                                    >
+                                                        <Icon icon="fluent:delete-24-regular" className="menu-icon" />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
 
-                            {/* Bootstrap Pagination */}
-                            <div className="d-flex justify-content-center tw-mb-3">
-                                <nav>
-                                    <ul className="pagination">
-                                        {/* Previous Button */}
-                                        <li className={`page-item ${!users.prev_page_url ? 'disabled' : ''}`}>
-                                            <Link href={users.prev_page_url || '#'} className="page-link">Previous</Link>
-                                        </li>
-                                        {/* Page Numbers */}
-                                        {Array.from({ length: users.last_page }, (_, i) => i + 1).map(page => (
-                                            <li key={page} className={`page-item ${page === users.current_page ? 'active' : ''}`}>
-                                                <Link href={users.path + `?page=${page}`} className="page-link">{page}</Link>
-                                            </li>
-                                        ))}
-                                        {/* Next Button */}
-                                        <li className={`page-item ${!users.next_page_url ? 'disabled' : ''}`}>
-                                            <Link href={users.next_page_url || '#'} className="page-link">Next</Link>
-                                        </li>
-                                    </ul>
-                                </nav>
-                            </div>
+                        {/* Pagination */}
+                        <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-24">
+                            <span>Showing {users.from} to {users.to} of {users.total} entries</span>
+                            <ul className="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
+                                <li className={`page-item ${!users.prev_page_url ? 'disabled' : ''}`}>
+                                    <Link
+                                        className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px text-md"
+                                        to={users.prev_page_url || '#'}
+                                    >
+                                        <Icon icon="ep:d-arrow-left" className="" />
+                                    </Link>
+                                </li>
+                                {Array.from({ length: users.last_page }, (_, i) => i + 1).map(page => (
+                                    <li key={page} className={`page-item ${page === users.current_page ? 'active' : ''}`}>
+                                        <Link
+                                            className="page-link text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px w-32-px"
+                                            to={`${users.path}?page=${page}`}
+                                        >
+                                            {page}
+                                        </Link>
+                                    </li>
+                                ))}
+                                <li className={`page-item ${!users.next_page_url ? 'disabled' : ''}`}>
+                                    <Link
+                                        className="page-link bg-neutral-200 text-secondary-light fw-semibold radius-8 border-0 d-flex align-items-center justify-content-center h-32-px text-md"
+                                        to={users.next_page_url || '#'}
+                                    >
+                                        <Icon icon="ep:d-arrow-right" className="" />
+                                    </Link>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-            </AdminHeader>
+            </AdminDashboard>
             <CookiesV />
         </>
     );

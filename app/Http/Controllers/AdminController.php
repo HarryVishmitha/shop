@@ -38,10 +38,25 @@ class AdminController extends Controller
         ]);
     }
     public function users(Request $request) {
-        $perPage = $request->input('perPage', 10);
-        $users = User::with(['role', 'workingGroup'])->paginate($perPage);
+        $perPage = $request->input('perPage', 10); // Get the perPage value from the request, defaulting to 10
+        $status = $request->input('status'); // Get the status filter from the request
+    
+        // Query the users, including the role and working group relationships
+        $query = User::with(['role', 'workingGroup']);
+    
+        // If a status filter is provided, apply it
+        if ($status) {
+            $query->where('status', $status);
+        }
+    
+        // Paginate the results with the specified perPage value
+        $users = $query->paginate($perPage);
+    
         return Inertia::render('admin/users', [
-            'users' => $users
+            'users' => $users,
+            'userDetails' => Auth::user(),
+            'status' => $status // Pass the selected status to the frontend for persistence
         ]);
     }
+    
 }

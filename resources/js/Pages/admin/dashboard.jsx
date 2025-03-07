@@ -16,7 +16,7 @@ const Dashboard = ({ totalUsers, adminUsers, userUsers, workingGroups, dailyCust
     return (
         <>
             <Head title="Admin Dashboard" />
-            <AdminDashboard>
+            <AdminDashboard userDetails={userDetails}>
                 <Breadcrumb title="Panels" />
                 {/* adding Metrics */}
                 <div className="row row-cols-xxxl-5 row-cols-lg-3 row-cols-sm-2 row-cols-1 gy-4">

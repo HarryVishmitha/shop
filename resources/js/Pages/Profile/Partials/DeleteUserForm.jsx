@@ -48,9 +48,9 @@ export default function DeleteUserForm({ className = '' }) {
     return (
         <section className={`tw-space-y-6 ${className}`}>
             <header>
-                <h2 className="tw-text-lg tw-font-medium tw-text-gray-900 dark:tw-text-gray-100">
+                <h4 className="tw-text-lg tw-font-medium tw-text-gray-900 dark:tw-text-gray-100 mb-3">
                     Delete Account
-                </h2>
+                </h4>
 
                 <p className="tw-mt-1 tw-text-sm tw-text-gray-600 dark:tw-text-gray-400">
                     Once your account is deleted, all of its resources and data
