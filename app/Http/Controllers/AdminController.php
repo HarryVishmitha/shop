@@ -33,6 +33,7 @@ class AdminController extends Controller
             'adminUsers' => $adminUsers,
             'userUsers' => $userUsers,
             'workingGroups' => $workingGroups,
+            'userDetails' => Auth::user(),
             'dailyCustomers' => $dailyCustomers
         ]);
     }

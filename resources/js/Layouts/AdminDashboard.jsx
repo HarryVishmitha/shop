@@ -1765,30 +1765,6 @@ const AdminDashboard = ({ children }) => {
                             </li>
                             <li>
                                 <Link
-                                className='dropdown-item text-black px-0 py-8 hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'
-                                to='/email'
-                                >
-                                <Icon
-                                    icon='tabler:message-check'
-                                    className='icon text-xl'
-                                />{" "}
-                                Inbox
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                className='dropdown-item text-black px-0 py-8 hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'
-                                to='/company'
-                                >
-                                <Icon
-                                    icon='icon-park-outline:setting-two'
-                                    className='icon text-xl'
-                                />
-                                Setting
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
                                 className='dropdown-item text-black px-0 py-8 hover-bg-transparent hover-text-danger d-flex align-items-center gap-3'
                                 href={route('logout')}
                                 method="post"

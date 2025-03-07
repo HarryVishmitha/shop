@@ -7,7 +7,7 @@ import { Icon } from "@iconify/react";
 import AdminDashboard from '../../Layouts/AdminDashboard';
 import Breadcrumb from "@/components/Breadcrumb";
 
-const Dashboard = ({ totalUsers, adminUsers, userUsers, workingGroups, dailyCustomers}) => {
+const Dashboard = ({ totalUsers, adminUsers, userUsers, workingGroups, dailyCustomers, userDetails}) => {
     const breadcrumbs = [
         { label: 'Home', url: route('home'), icon: 'fluent:home-48-regular' },
         { label: 'Admin Dashboard', url: '', icon: null },
