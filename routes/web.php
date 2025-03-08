@@ -33,6 +33,8 @@ Route::get('/auth/redirection', [Authredirection::class, 'index'])->middleware([
 
 Route::middleware(['auth', 'verified', CheckRole::class . ':admin'])->prefix('admin')->as('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+    Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
+    Route::post('/api/update-profile', [AdminController::class, 'updateProfile'])->name('updateProfile');
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     // Add more admin routes here
 });

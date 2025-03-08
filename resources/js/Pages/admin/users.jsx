@@ -57,7 +57,7 @@ const Users = ({ users, userDetails, status: selectedStatus }) => {
 
     return (
         <>
-            <Head title="Admin Dashboard" />
+            <Head title="Users - Admin" />
             <AdminDashboard userDetails={userDetails}>
                 <Breadcrumb title="All Users" />
                 <div className="card h-100 p-0 radius-12">
@@ -129,6 +129,7 @@ const Users = ({ users, userDetails, status: selectedStatus }) => {
                                         <th scope="col">Join Date</th>
                                         <th scope="col">Name</th>
                                         <th scope="col">Email</th>
+                                        <th scope="col">Phone Number</th>
                                         <th scope="col" className="text-center">Status</th>
                                         <th scope="col" className="text-center">Action</th>
                                     </tr>
@@ -162,6 +163,7 @@ const Users = ({ users, userDetails, status: selectedStatus }) => {
                                                 </div>
                                             </td>
                                             <td><span className="text-md mb-0 fw-normal text-secondary-light">{user.email}</span></td>
+                                            <td><span className="text-md mb-0 fw-normal text-secondary-light">{user.phone_number}</span></td>
                                             <td className="text-center">
                                                 <span className={`bg-${user.status === 'active' ? 'success' : 'neutral'}-focus text-${user.status === 'active' ? 'success' : 'neutral'}-600 border border-${user.status === 'active' ? 'success' : 'neutral'}-main px-24 py-4 radius-4 fw-medium text-sm tw-capitalize`}>
                                                     {user.status}

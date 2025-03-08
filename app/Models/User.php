@@ -18,6 +18,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'working_group_id',  // New field
         'status',             // New field
+        'phone_number',
+        'profile_picture',
     ];
 
     protected $hidden = [

@@ -37,6 +37,16 @@ class AdminController extends Controller
             'dailyCustomers' => $dailyCustomers
         ]);
     }
+
+    public function profile() {
+        $user = Auth::user();
+        $userDetails = User::with(['role', 'workingGroup'])->find($user->id);
+
+        return Inertia::render('admin/profile', [
+            'userDetails' => $userDetails,
+        ]);
+    }
+
     public function users(Request $request) {
         $perPage = $request->input('perPage', 10); // Get the perPage value from the request, defaulting to 10
         $status = $request->input('status'); // Get the status filter from the request
@@ -57,6 +67,11 @@ class AdminController extends Controller
             'userDetails' => Auth::user(),
             'status' => $status // Pass the selected status to the frontend for persistence
         ]);
+    }
+
+    public function updateProfile()
+    {
+        
     }
     
 }
