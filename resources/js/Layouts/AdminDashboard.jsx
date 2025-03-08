@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { useState, useEffect } from 'react';
 import { useLocation, NavLink } from "react-router-dom";
@@ -12,6 +12,7 @@ const AdminDashboard = ({ children, userDetails }) => {
     const location = useLocation(); // Hook to get the current route
     const currentYear = new Date().getFullYear(); // Get the current year
     const [theme, setTheme] = useState('light'); // Initialize theme state
+    const { url, component } = usePage();
 
     useEffect(() => {
 
@@ -89,23 +90,23 @@ const AdminDashboard = ({ children, userDetails }) => {
       });
 
       const openActiveDropdown = () => {
-        const allDropdowns = document.querySelectorAll(".sidebar-menu .dropdown");
-        allDropdowns.forEach((dropdown) => {
-          const submenuLinks = dropdown.querySelectorAll(".sidebar-submenu li a");
-          submenuLinks.forEach((link) => {
-            if (
-              link.getAttribute("href") === location.pathname ||
-              link.getAttribute("to") === location.pathname
-            ) {
-              dropdown.classList.add("open");
-              const submenu = dropdown.querySelector(".sidebar-submenu");
-              if (submenu) {
-                submenu.style.maxHeight = `${submenu.scrollHeight}px`; // Expand submenu
-              }
-            }
-          });
-        });
-      };
+  const allDropdowns = document.querySelectorAll(".sidebar-menu .dropdown");
+  allDropdowns.forEach((dropdown) => {
+    const submenuLinks = dropdown.querySelectorAll(".sidebar-submenu li a");
+    submenuLinks.forEach((link) => {
+      if (link.getAttribute("href") === window.location.pathname) {
+        dropdown.classList.add("open");
+        const submenu = dropdown.querySelector(".sidebar-submenu");
+        if (submenu) {
+          submenu.style.maxHeight = `${submenu.scrollHeight}px`; // Expand submenu
+        }
+      }
+    });
+  });
+};
+
+// Call the function to open the active dropdown when the page loads
+document.addEventListener("DOMContentLoaded", openActiveDropdown);
 
       // Open the submenu that contains the active route
       openActiveDropdown();
@@ -116,7 +117,7 @@ const AdminDashboard = ({ children, userDetails }) => {
           trigger.removeEventListener("click", handleDropdownClick);
         });
       };
-    }, [location.pathname], [mobileMenu]);
+    }, [location.pathname], [mobileMenu], [url]);
 
     let sidebarControl = () => {
         if (mobileMenu) {
@@ -192,7 +193,7 @@ const AdminDashboard = ({ children, userDetails }) => {
                         <li className='mb-3'>
                             <Link
                                 href={ route("admin.dashboard") }
-                                className={(navData) => (navData.isActive ? "active-page" : "")}
+                                className={url === '/admin/dashboard' ? 'active-page' : ''}
                             >
                                 <Icon
                                 icon='solar:home-smile-angle-outline'
@@ -205,7 +206,7 @@ const AdminDashboard = ({ children, userDetails }) => {
                         <li className='sidebar-menu-group-title'>User Management</li>
                         {/* Users Dropdown */}
                         <li className='dropdown'>
-                            <Link href={route('admin.users')}>
+                            <Link href='#'>
                                 <Icon
                                 icon='flowbite:users-group-outline'
                                 className='menu-icon'
@@ -215,36 +216,23 @@ const AdminDashboard = ({ children, userDetails }) => {
                             <ul className='sidebar-submenu'>
                                 <li>
                                 <Link
-                                    href={route('admin.users')}
-                                    className={(navData) =>
-                                    navData.isActive ? "active-page" : ""
-                                    }
+                                    href='/admin/users'
+                                    className={url === '/admin/users' ? 'active-page' : ''}
                                 >
                                     <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
                                     All Users
                                 </Link>
                                 </li>
                                 <li>
-                                <Link
-                                    to='/users-grid'
-                                    className={(navData) =>
-                                    navData.isActive ? "active-page" : ""
-                                    }
-                                >
-                                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                                    Users Grid
-                                </Link>
-                                </li>
-                                <li>
-                                <Link
-                                    to='/add-user'
-                                    className={(navData) =>
-                                    navData.isActive ? "active-page" : ""
-                                    }
-                                >
-                                    <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                                    Add User
-                                </Link>
+                                    <Link
+                                        to='/add-user'
+                                        className={(navData) =>
+                                        navData.isActive ? "active-page" : ""
+                                        }
+                                    >
+                                        <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
+                                        Add User
+                                    </Link>
                                 </li>
                                 <li>
                                 <Link

@@ -15700,7 +15700,11 @@ td.fc-header-center {
 }
 
 .sidebar-menu li > a.active-page:hover {
-  color: #fff;
+  color: #fff !important;
+}
+
+.sidebar-menu ul.sidebar-submenu li > a.active-page:hover {
+    color: var(--text-primary-light) !important;
 }
 
 .sidebar-menu li a {
