@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="{{ $description ?? 'You think it, We ink it.' }}">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <!-- Open Graph Meta Tags -->
         <meta property="og:type" content="website">

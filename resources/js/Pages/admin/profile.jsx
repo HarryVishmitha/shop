@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 import AdminDashboard from '../../Layouts/AdminDashboard';
 import Breadcrumb from "@/components/Breadcrumb";
 import CookiesV from '@/Components/CookieConsent';
+import axios from 'axios';
 
 const Profile = ({ userDetails }) => {
     const [imagePreview, setImagePreview] = useState('/assets/images/user.png');
@@ -15,7 +16,8 @@ const Profile = ({ userDetails }) => {
         phone_number: userDetails.phone_number || '',
         description: userDetails.description || '',
         newPassword: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        profileImage: null
     });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
@@ -35,6 +37,7 @@ const Profile = ({ userDetails }) => {
             const reader = new FileReader();
             reader.onload = (e) => {
                 setImagePreview(e.target.result);
+                setFormData({ ...formData, profileImage: input.target.files[0] });
             };
             reader.readAsDataURL(input.target.files[0]);
         }
@@ -56,35 +59,35 @@ const Profile = ({ userDetails }) => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e) => {
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (validateForm()) {
             setLoading(true);
             setErrorMessage('');
             setSuccessMessage('');
-            
-            // Send data to the backend
-            fetch(route('admin.updateProfile'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(data => {
+
+
+            try {
+                // Send data to the backend using Axios
+                const response = await axios.post('/admin/api/update-profile', formData);
+                console.log(formData);
+                // If the request is successful
                 setLoading(false);
                 setSuccessMessage('Profile updated successfully!');
-                console.log('Success:', data);
-            })
-            .catch((error) => {
+                console.log('Success:', response.data);
+            } catch (error) {
+                // If an error occurs
                 setLoading(false);
                 setErrorMessage('An error occurred while updating the profile.');
-                console.error('Error:', error);
-            });
+
+                // Optionally log the full error object for debugging
+                console.error('Error:', error.response ? error.response.data : error.message);
+            }
         }
     };
+
 
     return (
         <>
