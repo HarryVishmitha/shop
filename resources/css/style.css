@@ -51,7 +51,7 @@
     4.3 Bg Css
     4.4 Shadow Css
     4.5 Size Css
-    4.6 Spacing Css
+    4.6 Spacing Cssqf
     4.7 Radius Css
     4.8 Animation Css
     4.9 Typography Css
@@ -305,7 +305,7 @@
   --text-secondary-light: #d1d5db;
   --text-secondary-dark: var(--dark-2);
   --input-form-light: #6b7280;
-  --input-form-dark: #d1d5db;
+  --input-form-dark: #d1d5db !important;
   --input-bg: var(--dark-3);
   --input-stroke: #f3f4f6;
   --primary-50: #e4f1ff0f;
@@ -15723,3 +15723,20 @@ td.fc-header-center {
 }
 
 /* === footer css end === */
+[type='text'],
+[type='email'],
+[type='url'],
+[type='password'],
+[type='number'],
+[type='date'],
+[type='datetime-local'],
+[type='month'],
+[type='search'],
+[type='tel'],
+[type='time'],
+[type='week'],
+[multiple],
+textarea,
+select {
+    background-color: transparent !important;
+}
