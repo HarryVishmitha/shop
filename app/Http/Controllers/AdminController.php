@@ -74,57 +74,69 @@ class AdminController extends Controller
     }
 
     public function updateProfile(Request $request)
-{
-    // Validate incoming data
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|max:255|unique:users,email,' . Auth::id(),
-        'phone_number' => 'nullable|string|max:20',
-        'description' => 'nullable|string|max:1000',
-        'newPassword' => 'nullable|min:6|confirmed',
-        'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Validate the profile image
-    ]);
+    {
 
-    // Get the authenticated user
-    $user = User::find(Auth::id());
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . Auth::id(),
+            'phone_number' => 'nullable|string|max:20',
+            'description' => 'nullable|string|max:1000',
+            'newPassword' => 'nullable|min:6|confirmed',
+            'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Validate the profile image
+        ]);
 
-    if (!$user) {
-        return response()->json(['error' => 'User not authenticated'], 401);
-    }
+        // Get the authenticated user
+        $user = User::find(Auth::id());
 
-    // Update the user's profile information
-    $user->name = $validated['name'];
-    $user->email = $validated['email'];
-    $user->phone_number = $validated['phone_number'] ?? $user->phone_number;
-    // $user->description = $validated['description'] ?? $user->description;
-    Log::info('hi');
-    // If a new password is provided, hash and update it
-    if (!empty($validated['newPassword'])) {
-        $user->password = Hash::make($validated['newPassword']);
-    }
-
-    // Handle profile picture upload if provided
-    if ($request->hasFile('profile_picture')) {
-        // Delete old profile picture if exists
-        if ($user->profile_picture && Storage::exists('public/' . $user->profile_picture)) {
-            Storage::delete('public/' . $user->profile_picture);
+        if (!$user) {
+            return response()->json(['error' => 'User not authenticated'], 401);
         }
 
-        // Store the new profile picture
-        $image = $request->file('profile_picture');
-        $imageName = Str::uuid() . '.' . $image->getClientOriginalExtension();  // Unique image name
-        $path = $image->storeAs('public/images/users', $imageName);
+        // Update the user's profile information
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->phone_number = $validated['phone_number'] ?? $user->phone_number;
+        // $user->description = $validated['description'] ?? $user->description;
+        Log::info('hi');
+        // If a new password is provided, hash and update it
+        if (!empty($validated['newPassword'])) {
+            $user->password = Hash::make($validated['newPassword']);
+        }
 
-        // Save the new profile picture path
-        $user->profile_picture = '/images/users/' . $imageName;
+        // Handle profile picture upload if provided
+        if ($request->hasFile('profile_picture')) {
+            // Check if the user has a profile picture and delete it if it exists
+            if ($user->profile_picture && file_exists(public_path('images/users/' . basename($user->profile_picture)))) {
+                // Delete the old profile picture from the public images directory
+                unlink(public_path('images/users/' . basename($user->profile_picture)));
+            }
+        
+            // Handle the new profile picture upload
+            $image = $request->file('profile_picture');
+            $imageName = Str::uuid() . '.' . $image->getClientOriginalExtension();  // Unique image name
+            $image->move(public_path('images/users'), $imageName);  // Store image in public/images/users
+        
+            // Save the path to the user's profile picture
+            $user->profile_picture = '/images/users/' . $imageName;
+        }
+        
+        
+
+        // Save the updated user data
+        if ($user->save()) {
+            return response()->json(['success' => 'Profile updated successfully!'], 200);
+        } else {
+            return response()->json(['error' => 'Failed to update profile'], 500);
+        }
     }
 
-    // Save the updated user data
-    if ($user->save()) {
-        return response()->json(['success' => 'Profile updated successfully!'], 200);
-    } else {
-        return response()->json(['error' => 'Failed to update profile'], 500);
+    public function editUser($userId)
+    {
+        $user = Auth::user();
+        $userDetails = User::with(['role', 'workingGroup'])->find($user->id);
+        return inertia::render('admin/useredit',[
+            'userDetails' => $userDetails,
+        ]);
     }
-}
     
 }

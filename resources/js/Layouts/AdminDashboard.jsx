@@ -234,17 +234,6 @@ document.addEventListener("DOMContentLoaded", openActiveDropdown);
                                         Add User
                                     </Link>
                                 </li>
-                                <li>
-                                <Link
-                                    to='/view-profile'
-                                    className={(navData) =>
-                                    navData.isActive ? "active-page" : ""
-                                    }
-                                >
-                                    <i className='ri-circle-fill circle-icon text-danger-main w-auto' />{" "}
-                                    View Profile
-                                </Link>
-                                </li>
                             </ul>
                         </li>
 
@@ -679,7 +668,7 @@ document.addEventListener("DOMContentLoaded", openActiveDropdown);
                                 data-bs-toggle='dropdown'
                             >
                                 <img
-                                src='/assets/images/user.png'
+                                src={userDetails.profile_picture || '/assets/images/user.png'}
                                 alt='image_user'
                                 className='w-40-px h-40-px object-fit-cover rounded-circle'
                                 />
