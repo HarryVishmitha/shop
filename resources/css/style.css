@@ -15740,3 +15740,6 @@ textarea,
 select {
     background-color: transparent !important;
 }
+.active, .page-link.active {
+    z-index: 0 !important;
+}

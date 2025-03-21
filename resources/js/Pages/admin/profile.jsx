@@ -62,29 +62,29 @@ const Profile = ({ userDetails }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
         if (validateForm()) {
             setLoading(true);
             setErrorMessage('');
             setSuccessMessage('');
-    
+
             const formDataToSend = new FormData();
             // Append all the regular form fields
             formDataToSend.append('name', formData.name);
             formDataToSend.append('email', formData.email);
             formDataToSend.append('phone_number', formData.phone_number);
             formDataToSend.append('description', formData.description);
-    
+
             // If a new profile image exists, append it
             if (formData.profileImage) {
                 formDataToSend.append('profile_picture', formData.profileImage);
             }
-    
+
             // If a new password exists, append it
             if (formData.newPassword) {
                 formDataToSend.append('newPassword', formData.newPassword);
             }
-    
+
             try {
                 const response = await axios.post('/admin/api/update-profile', formDataToSend);
                 console.log(formDataToSend);
@@ -92,11 +92,29 @@ const Profile = ({ userDetails }) => {
                 setSuccessMessage('Profile updated successfully!');
             } catch (error) {
                 setLoading(false);
-                setErrorMessage('Error: ' + error.message);
-                console.error('Error:', error.response ? error.response.data : error.message);
+                if (error.response) {
+                    // Backend error response handling
+                    const responseData = error.response.data;
+                    if (responseData.errors) {
+                        // If the backend provides specific field errors
+                        setErrors(responseData.errors);
+                        if (responseData.errors.profile_picture) {
+                            setErrorMessage(responseData.errors.profile_picture);
+                        } else {
+                            setErrorMessage('Please fill all required fields');
+                        }
+
+
+                    } else {
+                        setErrorMessage(responseData.error || 'Something went wrong.');
+                    }
+                } else {
+                    // Network or other errors
+                    setErrorMessage('An unexpected error occurred. Please try again later. Error:' + error.message);
+                }
             }
         }
-    };    
+    };
 
 
     return (
@@ -237,16 +255,17 @@ const Profile = ({ userDetails }) => {
                                         <div className="col-sm-6">
                                             <div className="mb-20">
                                                 <label htmlFor="phone_number" className="form-label fw-semibold text-primary-light text-sm mb-8">
-                                                    Phone
+                                                    Phone <span className="text-danger-600">*</span>
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    className="form-control radius-8 tw-rounded"
+                                                    className={`form-control radius-8 tw-rounded ${errors.phone_number ? 'is-invalid' : ''}`}
                                                     id="phone_number"
                                                     placeholder="Enter phone number"
                                                     value={formData.phone_number}
                                                     onChange={handleChange}
                                                 />
+                                                {errors.phone_number && <div className="invalid-feedback">{errors.phone_number}</div>}
                                             </div>
                                         </div>
                                         <div className="mb-20">

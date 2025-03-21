@@ -37,6 +37,7 @@ Route::middleware(['auth', 'verified', CheckRole::class . ':admin'])->prefix('ad
     Route::post('/api/update-profile', [AdminController::class, 'updateProfile'])->name('updateProfile');
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::get('/edit-user/{userId}', [AdminController::class, 'editUser'])->name('editUser');
+    Route::post('/api/edit-profile/{userID}', [AdminController::class, 'updateUser'])->name('updateUser');
     // Add more admin routes here
 });
 
