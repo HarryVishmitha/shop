@@ -7,7 +7,7 @@ import CookiesV from '@/Components/CookieConsent';
 import axios from 'axios';
 
 const Profile = ({ userDetails }) => {
-    const [imagePreview, setImagePreview] = useState('/assets/images/user.png');
+    const [imagePreview, setImagePreview] = useState(userDetails.profile_picture || '/assets/images/user.png');
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
     const [formData, setFormData] = useState({
@@ -62,31 +62,41 @@ const Profile = ({ userDetails }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
         if (validateForm()) {
             setLoading(true);
             setErrorMessage('');
             setSuccessMessage('');
-
-
+    
+            const formDataToSend = new FormData();
+            // Append all the regular form fields
+            formDataToSend.append('name', formData.name);
+            formDataToSend.append('email', formData.email);
+            formDataToSend.append('phone_number', formData.phone_number);
+            formDataToSend.append('description', formData.description);
+    
+            // If a new profile image exists, append it
+            if (formData.profileImage) {
+                formDataToSend.append('profile_picture', formData.profileImage);
+            }
+    
+            // If a new password exists, append it
+            if (formData.newPassword) {
+                formDataToSend.append('newPassword', formData.newPassword);
+            }
+    
             try {
-                // Send data to the backend using Axios
-                const response = await axios.post('/admin/api/update-profile', formData);
-                console.log(formData);
-                // If the request is successful
+                const response = await axios.post('/admin/api/update-profile', formDataToSend);
+                console.log(formDataToSend);
                 setLoading(false);
                 setSuccessMessage('Profile updated successfully!');
-                console.log('Success:', response.data);
             } catch (error) {
-                // If an error occurs
                 setLoading(false);
-                setErrorMessage('An error occurred while updating the profile.');
-
-                // Optionally log the full error object for debugging
+                setErrorMessage('Error: ' + error.message);
                 console.error('Error:', error.response ? error.response.data : error.message);
             }
         }
-    };
+    };    
 
 
     return (
@@ -158,7 +168,7 @@ const Profile = ({ userDetails }) => {
 
                                 {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
                                 {successMessage && <div className="alert alert-success">{successMessage}</div>}
-                                <form onSubmit={handleSubmit}>
+                                <form onSubmit={handleSubmit} encType="multipart/form-data">
                                     <h6 className="text-md text-primary-light mb-16">Profile Image</h6>
                                     {/* Upload Image Start */}
                                     <div className="mb-24 mt-16">
