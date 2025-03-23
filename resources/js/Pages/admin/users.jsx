@@ -6,6 +6,7 @@ import CookiesV from '@/Components/CookieConsent';
 import { Icon } from "@iconify/react";
 import AdminDashboard from '../../Layouts/AdminDashboard';
 import Breadcrumb from "@/components/Breadcrumb";
+import Alert from "@/Components/Alert";
 
 const Users = ({ users, userDetails, status: selectedStatus }) => {
     // Get the perPage value from the URL or default to 10
@@ -14,12 +15,7 @@ const Users = ({ users, userDetails, status: selectedStatus }) => {
     const [perPage, setPerPage] = useState(initialPerPage);
     const [search, setSearch] = useState(''); // State for search input
     const [status, setStatus] = useState(selectedStatus || ''); // State for status filter
-
-    const breadcrumbs = [
-        { label: 'Home', url: route('home'), icon: 'fluent:home-48-regular' },
-        { label: 'Admin Dashboard', url: route('admin.dashboard'), icon: null },
-        { label: 'Users', url: '', icon: null },
-    ];
+    const [selectedUserId, setSelectedUserId] = useState(null); // State to store the selected user ID for deletion/suspension
 
     // Handle per page change
     const handlePerPageChange = (event) => {
@@ -57,6 +53,18 @@ const Users = ({ users, userDetails, status: selectedStatus }) => {
 
     const handleViewUser = (userID) => {
 
+    };
+
+    const handleuserDelete = (userID) => {
+        
+    }
+
+    const handleuserSuspension = (userID) => {
+
+    }
+
+    const openDeleteModal = (userID) => {
+        setSelectedUserId(userID);
     };
 
     return (
@@ -111,7 +119,6 @@ const Users = ({ users, userDetails, status: selectedStatus }) => {
                             Add New User
                         </Link>
                     </div>
-
                     <div className="card-body p-24">
                         <div className="table-responsive scroll-sm">
                             <table className="table bordered-table sm-table mb-0">
@@ -197,6 +204,8 @@ const Users = ({ users, userDetails, status: selectedStatus }) => {
                                                     <button
                                                         type="button"
                                                         className="remove-item-btn bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
+                                                        data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                        onClick={() => openDeleteModal(user.id)}
                                                     >
                                                         <Icon icon="fluent:delete-24-regular" className="menu-icon" />
                                                     </button>
@@ -239,6 +248,26 @@ const Users = ({ users, userDetails, status: selectedStatus }) => {
                                     </Link>
                                 </li>
                             </ul>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Delete Modal */}
+                <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5 tw-text-red-500" id="deleteconfirmLabel">Are you sure?</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body tw-font-light">
+                                <p>Do you really want to delete this user? This process cannot be undone.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-outline-warning" onClick={handleuserSuspension()}>Suspend User</button>
+                                <button type="button" class="btn btn-outline-danger" onClick={handleuserDelete()}>Delete User</button>
+                            </div>
                         </div>
                     </div>
                 </div>

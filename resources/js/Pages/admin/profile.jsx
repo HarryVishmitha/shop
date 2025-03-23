@@ -5,6 +5,7 @@ import AdminDashboard from '../../Layouts/AdminDashboard';
 import Breadcrumb from "@/components/Breadcrumb";
 import CookiesV from '@/Components/CookieConsent';
 import axios from 'axios';
+import Alert from '@/Components/Alert';
 
 const Profile = ({ userDetails }) => {
     const [imagePreview, setImagePreview] = useState(userDetails.profile_picture || '/assets/images/user.png');
@@ -184,8 +185,9 @@ const Profile = ({ userDetails }) => {
                         <div className="card h-100">
                             <div className="card-body p-24">
 
-                                {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
-                                {successMessage && <div className="alert alert-success">{successMessage}</div>}
+                                {errorMessage && <Alert type="danger" message={errorMessage}/>}
+                                {successMessage && <Alert type="success" message={successMessage} />}
+                                {errors.profile_picture && <div className="mb-3 alert alert-danger bg-danger-100 text-danger-600 border-danger-600 border-start-width-4-px border-top-0 border-end-0 border-bottom-0 px-24 py-13 mb-0 text-lg radius-4 d-flex align-items-center justify-content-between">{errors.profile_picture}</div>}
                                 <form onSubmit={handleSubmit} encType="multipart/form-data">
                                     <h6 className="text-md text-primary-light mb-16">Profile Image</h6>
                                     {/* Upload Image Start */}
@@ -198,6 +200,7 @@ const Profile = ({ userDetails }) => {
                                                     accept=".png, .jpg, .jpeg"
                                                     hidden
                                                     onChange={readURL}
+                                                    // className={`${errors.profile_picture ? 'is-invalid' : ''}`}
                                                 />
                                                 <label
                                                     htmlFor="imageUpload"

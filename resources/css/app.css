@@ -9,3 +9,25 @@ body {
 .no-dropdown-triangle::after {
     display: none;
 }
+/* Add these styles in your CSS file */
+.alert-enter {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  .alert-enter-active {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  }
+
+  .alert-exit {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .alert-exit-active {
+    opacity: 0;
+    transform: translateX(100%);
+    transition: opacity 0.3s ease-in, transform 0.3s ease-in;
+}
