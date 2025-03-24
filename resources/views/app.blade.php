@@ -15,7 +15,7 @@
 
         <!-- Twitter Card Meta Tags -->
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="{{ $title ?? 'Printair Advertising' }}">
+        <meta name="twitter:title" content="{{ config('app.name', 'Printair') ?? 'Printair Advertising' }}">
         <meta name="twitter:description" content="{{ $description ?? 'You think it, We ink it.' }}">
         <meta name="twitter:image" content="{{ $og_image ?? asset('path/to/default/image.jpg') }}">
         <meta name="twitter:url" content="{{ url()->current() }}">

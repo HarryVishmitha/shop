@@ -38,6 +38,9 @@ Route::middleware(['auth', 'verified', CheckRole::class . ':admin'])->prefix('ad
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::get('/edit-user/{userId}', [AdminController::class, 'editUser'])->name('editUser');
     Route::post('/api/edit-profile/{userID}', [AdminController::class, 'updateUser'])->name('updateUser');
+    Route::patch('/api/users/{id}/assign-working-group', [AdminController::class, 'assignWorkingGroup'])->name('assignWorkingGroup');
+    Route::patch('/api/users/{id}/update-status', [AdminController::class, 'updateStatus'])->name('updateStatus');
+
     // Add more admin routes here
 });
 

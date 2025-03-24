@@ -65,10 +65,12 @@ class AdminController extends Controller
 
         // Paginate the results with the specified perPage value
         $users = $query->paginate($perPage);
+        $workingGroups = WorkingGroup::all();
 
         return Inertia::render('admin/users', [
             'users' => $users,
             'userDetails' => Auth::user(),
+            'workingGroups' => $workingGroups,
             'status' => $status // Pass the selected status to the frontend for persistence
         ]);
     }
@@ -186,6 +188,120 @@ class AdminController extends Controller
         }
     }
 
+    public function assignWorkingGroup(Request $request, $id)
+    {
+        // Validate that working_group_id is either null or exists in the working_groups table
+        $validatedData = $request->validate([
+            'working_group_id' => 'nullable|exists:working_groups,id',
+        ]);
+
+        // Retrieve the user by id
+        $user = User::findOrFail($id);
+
+        // Check if the working group assignment is changing
+        if ($user->working_group_id == $validatedData['working_group_id']) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status'  => 'info',
+                    'message' => 'No changes detected in working group assignment.',
+                ], 200);
+            }
+            return back()->with('info', 'No changes detected in working group assignment.');
+        }
+
+        try {
+            $oldGroupId = $user->working_group_id;
+
+            // Update the user's working group assignment using Eloquent's update
+            $user->update([
+                'working_group_id' => $validatedData['working_group_id']
+            ]);
+
+            // // Log the working group change for auditing purposes
+            // WorkingGroupLog::create([
+            //     'user_id'              => $user->id,
+            //     'old_working_group_id' => $oldGroupId,
+            //     'new_working_group_id' => $user->working_group_id,
+            //     'changed_by'           => auth()->id(),
+            // ]);
+
+            // // Fire an event for further processing (like notifications)
+            // event(new UserWorkingGroupUpdated($user));
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status'  => 'success',
+                    'message' => 'Working group updated successfully.',
+                    'user'    => $user,
+                ], 200);
+            }
+
+            return back()->with('success', 'Working group updated successfully.');
+        } catch (\Exception $e) {
+            Log::error('Error updating working group for user ID ' . $user->id . ': ' . $e->getMessage());
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Failed to update working group. Please try again later.',
+                ], 500);
+            }
+
+            return back()->withErrors('Failed to update working group. Please try again later.');
+        }
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        // Validate that status is one of the allowed values
+        $validatedData = $request->validate([
+            'status' => 'required|in:active,inactive,suspended',
+        ]);
+
+        // Retrieve the user by id
+        $user = User::findOrFail($id);
+
+        // Check if the status assignment is changing
+        if ($user->status == $validatedData['status']) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status'  => 'info',
+                    'message' => 'No changes detected in status assignment.',
+                ], 200);
+            }
+            return back()->with('info', 'No changes detected in status assignment.');
+        }
+
+        try {
+            $oldStatus = $user->status;
+
+            // Update the user's status using Eloquent's update
+            $user->update([
+                'status' => $validatedData['status']
+            ]);
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status'  => 'success',
+                    'message' => 'User status updated successfully.',
+                    'user'    => $user,
+                ], 200);
+            }
+
+            return back()->with('success', 'User status updated successfully.');
+        } catch (\Exception $e) {
+            Log::error('Error updating status for user ID ' . $user->id . ': ' . $e->getMessage());
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Failed to update user status. Please try again later.',
+                ], 500);
+            }
+
+            return back()->withErrors('Failed to update user status. Please try again later.');
+        }
+    }
 
 
 }

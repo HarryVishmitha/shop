@@ -177,7 +177,7 @@ const useredit = ({ userDetails, selectedUser , selectedID}) => {
                                                 {" "}Working Group
                                             </span>
                                             <span className="w-70 text-secondary-light fw-medium tw-capitalize">
-                                                : {selectedUser.working_group_id != '' ? selectedUser.working_group.name : 'Public'}
+                                                : {selectedUser.working_group && selectedUser.working_group.name ? selectedUser.working_group.name : 'Public'}
                                             </span>
                                         </li>
                                     </ul>

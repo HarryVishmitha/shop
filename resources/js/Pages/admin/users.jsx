@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import AdminHeader from '../../Components/AdminHeader';
 import AdminNav from '@/Components/AdminNav';
 import CookiesV from '@/Components/CookieConsent';
@@ -8,63 +8,95 @@ import AdminDashboard from '../../Layouts/AdminDashboard';
 import Breadcrumb from "@/components/Breadcrumb";
 import Alert from "@/Components/Alert";
 
-const Users = ({ users, userDetails, status: selectedStatus }) => {
-    // Get the perPage value from the URL or default to 10
+const Users = ({ users, userDetails, status: selectedStatus, workingGroups }) => {
     const queryParams = new URLSearchParams(window.location.search);
-    const initialPerPage = queryParams.get('perPage') || 10; // Default to 10 if not set in the URL
+    const initialPerPage = queryParams.get('perPage') || 10;
     const [perPage, setPerPage] = useState(initialPerPage);
-    const [search, setSearch] = useState(''); // State for search input
-    const [status, setStatus] = useState(selectedStatus || ''); // State for status filter
-    const [selectedUserId, setSelectedUserId] = useState(null); // State to store the selected user ID for deletion/suspension
+    const [search, setSearch] = useState('');
+    const [status, setStatus] = useState(selectedStatus || '');
+    const [selectedUserId, setSelectedUserId] = useState(null);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedWorkingGroup, setSelectedWorkingGroup] = useState('');
+    const [selectedStatusModal, setSelectedStatusModal] = useState('');
+    const [alert, setAlert] = useState(null); // { type: 'success'|'danger', message: string }
 
-    // Handle per page change
+    // When the selected user changes, update the modal inputs
+    useEffect(() => {
+        if (selectedUser) {
+            setSelectedWorkingGroup(selectedUser.working_group_id || '');
+            setSelectedStatusModal(selectedUser.status || '');
+        }
+    }, [selectedUser]);
+
+    // Handle table header changes
     const handlePerPageChange = (event) => {
         const value = event.target.value;
-        setPerPage(value); // Update perPage state
-        // Update URL with the new perPage value and reload the page
-        window.location.href = `${users.path}?page=${users.current_page}&perPage=${value}&status=${status}`;
+        setPerPage(value);
+        router.visit(`${users.path}?page=${users.current_page}&perPage=${value}&status=${status}`);
     };
 
-    // Handle search change
     const handleSearchChange = (event) => {
         setSearch(event.target.value);
-        // Optionally, you could implement filtering by search term here.
+        // Optionally, add search filtering logic
     };
 
-    // Handle status filter change
     const handleStatusChange = (event) => {
-        setStatus(event.target.value);
-        // Update the URL with the selected status and reload the page
-        window.location.href = `${users.path}?page=${users.current_page}&perPage=${perPage}&status=${event.target.value}`;
+        const value = event.target.value;
+        setStatus(value);
+        router.visit(`${users.path}?page=${users.current_page}&perPage=${perPage}&status=${value}`);
     };
 
     useEffect(() => {
-        // Sync state with URL in case perPage is changed manually
         const queryParams = new URLSearchParams(window.location.search);
         const pagePerPage = queryParams.get('perPage');
         const pageStatus = queryParams.get('status');
-        if (pagePerPage) {
-            setPerPage(pagePerPage);
-        }
-        if (pageStatus) {
-            setStatus(pageStatus);
-        }
+        if (pagePerPage) setPerPage(pagePerPage);
+        if (pageStatus) setStatus(pageStatus);
     }, [users.path]);
 
-    const handleViewUser = (userID) => {
-
+    // Modal handling: set selected user and let Bootstrap trigger the modal
+    const handleViewUser = (user) => {
+        setSelectedUser(user);
     };
 
     const handleuserDelete = (userID) => {
-        
-    }
+        // Implement delete user logic here
+    };
 
     const handleuserSuspension = (userID) => {
-
-    }
+        // Implement user suspension logic here
+    };
 
     const openDeleteModal = (userID) => {
         setSelectedUserId(userID);
+    };
+
+    // Combined update function: update working group then update status
+    const updateUserInfo = (userId) => {
+        router.patch(`/admin/api/users/${userId}/assign-working-group`,
+            { working_group_id: selectedWorkingGroup },
+            {
+                preserveState: true,
+                onSuccess: () => {
+                    router.patch(`/admin/api/users/${userId}/update-status`,
+                        { status: selectedStatusModal },
+                        {
+                            preserveState: true,
+                            onSuccess: () => {
+                                setAlert({ type: "success", message: "User info updated successfully." });
+                            },
+                            onError: () => {
+                                setAlert({ type: "danger", message: "Failed to update user status." });
+
+                            }
+                        }
+                    );
+                },
+                onError: () => {
+                    setAlert({ type: "danger", message: "Failed to update working group." });
+                }
+            }
+        );
     };
 
     return (
@@ -72,6 +104,8 @@ const Users = ({ users, userDetails, status: selectedStatus }) => {
             <Head title="Users - Admin" />
             <AdminDashboard userDetails={userDetails}>
                 <Breadcrumb title="All Users" />
+                {/* Display Alert if any */}
+                {alert && <Alert type={alert.type} message={alert.message} onClose={() => setAlert(null)} />}
                 <div className="card h-100 p-0 radius-12">
                     <div className="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
                         <div className="d-flex align-items-center flex-wrap gap-3">
@@ -109,15 +143,16 @@ const Users = ({ users, userDetails, status: selectedStatus }) => {
                                 <option value="" disabled>Select Status</option>
                                 <option value="Active">Active</option>
                                 <option value="Inactive">Inactive</option>
+                                <option value="Suspended">Suspended</option>
                             </select>
                         </div>
-                        <Link
+                        {/* <Link
                             to="/add-user"
                             className="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2"
                         >
                             <Icon icon="ic:baseline-plus" className="icon text-xl line-height-1" />
                             Add New User
-                        </Link>
+                        </Link> */}
                     </div>
                     <div className="card-body p-24">
                         <div className="table-responsive scroll-sm">
@@ -174,25 +209,32 @@ const Users = ({ users, userDetails, status: selectedStatus }) => {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td><span className="text-md mb-0 fw-normal text-secondary-light">{user.email}</span></td>
-                                            <td><span className="text-md mb-0 fw-normal text-secondary-light tw-capitalize">{user.role.name}</span></td>
-                                            <td><span className="text-md mb-0 fw-normal text-secondary-light">{user.phone_number}</span></td>
+                                            <td>
+                                                <span className="text-md mb-0 fw-normal text-secondary-light">{user.email}</span>
+                                            </td>
+                                            <td>
+                                                <span className="text-md mb-0 fw-normal text-secondary-light tw-capitalize">{user.role.name}</span>
+                                            </td>
+                                            <td>
+                                                <span className="text-md mb-0 fw-normal text-secondary-light">{user.phone_number}</span>
+                                            </td>
                                             <td className="text-center">
-                                                <span className={`bg-${user.status === 'active' ? 'success' : 'neutral'}-focus text-${user.status === 'active' ? 'success' : 'neutral'}-600 border border-${user.status === 'active' ? 'success' : 'neutral'}-main px-24 py-4 radius-4 fw-medium text-sm tw-capitalize`}>
+                                                <span className={`bg-${user.status === 'active' ? 'success' : user.status === 'inactive' ? 'warning' : 'danger'}-focus text-${user.status === 'active' ? 'success' : user.status === 'inactive' ? 'warning' : 'danger'}-600 border border-${user.status === 'active' ? 'success' : user.status === 'inactive' ? 'warning' : 'danger'}-main px-24 py-4 radius-4 fw-medium text-sm tw-capitalize`}>
                                                     {user.status}
                                                 </span>
                                             </td>
                                             <td className="text-center">
                                                 <div className="d-flex align-items-center gap-10 justify-content-center">
-                                                    <Link href={`/admin/edit-user/${user.id}`}>
-                                                        <button
-                                                            type="button"
-                                                            className="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
-                                                            onClick={() => handleViewUser(user.id)}
-                                                        >
-                                                            <Icon icon="majesticons:eye-line" className="icon text-xl" />
-                                                        </button>
-                                                    </Link>
+                                                    {/* Trigger Bootstrap modal for view/update */}
+                                                    <button
+                                                        type="button"
+                                                        className="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#viewUserModal"
+                                                        onClick={() => handleViewUser(user)}
+                                                    >
+                                                        <Icon icon="majesticons:eye-line" className="icon text-xl" />
+                                                    </button>
                                                     <Link href={`/admin/edit-user/${user.id}`}>
                                                         <button
                                                             type="button"
@@ -216,8 +258,6 @@ const Users = ({ users, userDetails, status: selectedStatus }) => {
                                 </tbody>
                             </table>
                         </div>
-
-                        {/* Pagination */}
                         <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-24">
                             <span>Showing {users.from} to {users.to} of {users.total} entries</span>
                             <ul className="pagination d-flex flex-wrap align-items-center gap-2 justify-content-center">
@@ -252,21 +292,102 @@ const Users = ({ users, userDetails, status: selectedStatus }) => {
                     </div>
                 </div>
 
-                {/* Delete Modal */}
-                <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h1 class="modal-title fs-5 tw-text-red-500" id="deleteconfirmLabel">Are you sure?</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                {/* Bootstrap View User Modal */}
+                <div className="modal fade" id="viewUserModal" tabIndex="-1" aria-labelledby="viewUserModalLabel" aria-hidden="true">
+                    <div className="modal-dialog modal-lg modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header border-0">
+                                <h5 className="modal-title" id="viewUserModalLabel">User Details</h5>
+                                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" onClick={() => setSelectedUser(null)}></button>
                             </div>
-                            <div class="modal-body tw-font-light">
+                            <div className="modal-body">
+                                {selectedUser ? (
+                                    <div>
+                                        <div className="text-center tw-mb-4">
+                                            <img
+                                                src={selectedUser.profile_picture || '/assets/images/user.png'}
+                                                alt={`Profile of ${selectedUser.name}`}
+                                                className="border br-white border-width-2-px w-200-px h-200-px rounded-circle object-fit-cover mx-auto"
+                                            />
+                                            <h2 className="mt-4 text-2xl font-bold">{selectedUser.name}</h2>
+                                            <p className="text-secondary-light">{selectedUser.email}</p>
+                                        </div>
+                                        <div className="mb-4">
+                                            <h3 className="text-xl tw-font-semibold mb-1 tw-text-blue-700">Personal Info</h3>
+                                            <ul className="list-unstyled">
+                                                <li><strong>Full Name:</strong> {selectedUser.name}</li>
+                                                <li><strong>Email:</strong> {selectedUser.email}</li>
+                                                <li><strong>Phone Number:</strong> {selectedUser.phone_number || 'Not Set'}</li>
+                                                <li><strong>Account:</strong> {selectedUser.role?.name}</li>
+                                                <li><strong>Working Group:</strong> {selectedUser.working_group && selectedUser.working_group.name ? selectedUser.working_group.name : 'Public'}</li>
+                                            </ul>
+                                        </div>
+                                        {/* Combined Update Section */}
+                                        <hr className='tw-my-3'/>
+                                        <div>
+                                            <h3 className="text-xl tw-font-semibold mb-1 tw-text-red-700">Update User Info</h3>
+                                            <div className="row g-3">
+                                                <div className="col-md-6">
+                                                    <label className="form-label">Working Group</label>
+                                                    <select
+                                                        value={selectedWorkingGroup}
+                                                        onChange={(e) => setSelectedWorkingGroup(e.target.value)}
+                                                        className="form-select"
+                                                    >
+                                                        <option value="">Public</option>
+                                                        {workingGroups.map((group) => (
+                                                            <option key={group.id} value={group.id}>
+                                                                {group.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label">Status</label>
+                                                    <select
+                                                        value={selectedStatusModal}
+                                                        onChange={(e) => setSelectedStatusModal(e.target.value)}
+                                                        className="form-select"
+                                                    >
+                                                        <option value="active">Active</option>
+                                                        <option value="inactive">Inactive</option>
+                                                        <option value="suspended">Suspended</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="mt-3 text-end">
+                                                <button
+                                                    className="btn btn-primary"
+                                                    onClick={() => updateUserInfo(selectedUser.id)}
+                                                >
+                                                    Update
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <p className="text-center">Loading...</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Delete Modal (Bootstrap) */}
+                <div className="modal fade" id="deleteModal" tabIndex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h1 className="modal-title fs-5 tw-text-red-500" id="deleteconfirmLabel">Are you sure?</h1>
+                                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div className="modal-body tw-font-light">
                                 <p>Do you really want to delete this user? This process cannot be undone.</p>
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-outline-warning" onClick={handleuserSuspension()}>Suspend User</button>
-                                <button type="button" class="btn btn-outline-danger" onClick={handleuserDelete()}>Delete User</button>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" className="btn btn-outline-warning" onClick={() => handleuserSuspension(selectedUserId)}>Suspend User</button>
+                                <button type="button" className="btn btn-outline-danger" onClick={() => handleuserDelete(selectedUserId)}>Delete User</button>
                             </div>
                         </div>
                     </div>

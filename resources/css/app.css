@@ -12,7 +12,7 @@ body {
 /* Add these styles in your CSS file */
 .alert-enter {
     opacity: 0;
-    transform: translateX(100%);
+    transform: translateX(120%);
   }
 
   .alert-enter-active {
@@ -28,6 +28,6 @@ body {
 
   .alert-exit-active {
     opacity: 0;
-    transform: translateX(100%);
+    transform: translateX(120%);
     transition: opacity 0.3s ease-in, transform 0.3s ease-in;
 }
