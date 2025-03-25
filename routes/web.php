@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\Home;
 use App\Http\Middleware\CheckRole;
+use App\Models\Notification;
+use App\Http\Controllers\NotificationsController;
 
 Route::get('/', function () {
     return Inertia::render('Home', [
@@ -33,6 +35,8 @@ Route::get('/auth/redirection', [Authredirection::class, 'index'])->middleware([
 
 Route::middleware(['auth', 'verified', CheckRole::class . ':admin'])->prefix('admin')->as('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+    Route::get('/api/notifications', [NotificationsController::class, 'index'])->name('notifications');
+    Route::post('/api/notifications/{id}/read', [NotificationsController::class, 'markAsRead'])->name('markAsRead');
     Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
     Route::post('/api/update-profile', [AdminController::class, 'updateProfile'])->name('updateProfile');
     Route::get('/users', [AdminController::class, 'users'])->name('users');
@@ -40,6 +44,7 @@ Route::middleware(['auth', 'verified', CheckRole::class . ':admin'])->prefix('ad
     Route::post('/api/edit-profile/{userID}', [AdminController::class, 'updateUser'])->name('updateUser');
     Route::patch('/api/users/{id}/assign-working-group', [AdminController::class, 'assignWorkingGroup'])->name('assignWorkingGroup');
     Route::patch('/api/users/{id}/update-status', [AdminController::class, 'updateStatus'])->name('updateStatus');
+    Route::delete('/api/users/{id}', [AdminController::class, 'deleteUser'])->name('deleteUser');
 
     // Add more admin routes here
 });

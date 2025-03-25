@@ -9,13 +9,11 @@ use App\Models\User;
 use App\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 use App\Models\WorkingGroup;
 use App\Models\DailyCustomer;
-
+use App\Models\ActivityLog;
 
 class AdminController extends Controller
 {
@@ -32,12 +30,20 @@ class AdminController extends Controller
         $workingGroups = WorkingGroup::count();
         $dailyCustomers = DailyCustomer::count();
 
+        // Log dashboard access activity
+        ActivityLog::create([
+            'user_id'    => Auth::id(),
+            'action_type'=> 'dashboard_access',
+            'description'=> 'Admin accessed dashboard.',
+            'ip_address' => request()->ip(),
+        ]);
+
         return Inertia::render('admin/dashboard', [
-            'totalUsers' => $totalUsers,
-            'adminUsers' => $adminUsers,
-            'userUsers' => $userUsers,
-            'workingGroups' => $workingGroups,
-            'userDetails' => Auth::user(),
+            'totalUsers'     => $totalUsers,
+            'adminUsers'     => $adminUsers,
+            'userUsers'      => $userUsers,
+            'workingGroups'  => $workingGroups,
+            'userDetails'    => Auth::user(),
             'dailyCustomers' => $dailyCustomers
         ]);
     }
@@ -46,86 +52,92 @@ class AdminController extends Controller
         $user = Auth::user();
         $userDetails = User::with(['role', 'workingGroup'])->find($user->id);
 
+        // Log profile view activity
+        ActivityLog::create([
+            'user_id'    => $user->id,
+            'action_type'=> 'profile_view',
+            'description'=> 'Admin viewed profile.',
+            'ip_address' => request()->ip(),
+        ]);
+
         return Inertia::render('admin/profile', [
             'userDetails' => $userDetails,
         ]);
     }
 
     public function users(Request $request) {
-        $perPage = $request->input('perPage', 10); // Get the perPage value from the request, defaulting to 10
-        $status = $request->input('status'); // Get the status filter from the request
+        $perPage = $request->input('perPage', 10); // Default to 10 per page
+        $status = $request->input('status'); // Optional status filter
 
-        // Query the users, including the role and working group relationships
         $query = User::with(['role', 'workingGroup']);
 
-        // If a status filter is provided, apply it
         if ($status) {
             $query->where('status', $status);
         }
 
-        // Paginate the results with the specified perPage value
         $users = $query->paginate($perPage);
         $workingGroups = WorkingGroup::all();
 
+        // Log user list view activity
+        ActivityLog::create([
+            'user_id'    => Auth::id(),
+            'action_type'=> 'users_list_view',
+            'description'=> 'Admin viewed user list with filter status: ' . ($status ?? 'none'),
+            'ip_address' => request()->ip(),
+        ]);
+
         return Inertia::render('admin/users', [
-            'users' => $users,
-            'userDetails' => Auth::user(),
-            'workingGroups' => $workingGroups,
-            'status' => $status // Pass the selected status to the frontend for persistence
+            'users'        => $users,
+            'userDetails'  => Auth::user(),
+            'workingGroups'=> $workingGroups,
+            'status'       => $status
         ]);
     }
 
     public function updateProfile(Request $request)
     {
-
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . Auth::id(),
-            'phone_number' => 'required|string|max:20',
-            'description' => 'nullable|string|max:1000',
-            'newPassword' => 'nullable|min:6|confirmed',
-            'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Validate the profile image
+            'name'            => 'required|string|max:255',
+            'email'           => 'required|email|max:255|unique:users,email,' . Auth::id(),
+            'phone_number'    => 'required|string|max:20',
+            'description'     => 'nullable|string|max:1000',
+            'newPassword'     => 'nullable|min:6|confirmed',
+            'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // Get the authenticated user
         $user = User::find(Auth::id());
-
         if (!$user) {
             return response()->json(['error' => 'User not authenticated'], 401);
         }
 
-        // Update the user's profile information
-        $user->name = $validated['name'];
-        $user->email = $validated['email'];
+        // Update profile details
+        $user->name         = $validated['name'];
+        $user->email        = $validated['email'];
         $user->phone_number = $validated['phone_number'] ?? $user->phone_number;
-        // $user->description = $validated['description'] ?? $user->description;
-        Log::info('hi');
-        // If a new password is provided, hash and update it
+
         if (!empty($validated['newPassword'])) {
             $user->password = Hash::make($validated['newPassword']);
         }
 
         // Handle profile picture upload if provided
         if ($request->hasFile('profile_picture')) {
-            // Check if the user has a profile picture and delete it if it exists
             if ($user->profile_picture && file_exists(public_path('images/users/' . basename($user->profile_picture)))) {
-                // Delete the old profile picture from the public images directory
                 unlink(public_path('images/users/' . basename($user->profile_picture)));
             }
-
-            // Handle the new profile picture upload
             $image = $request->file('profile_picture');
-            $imageName = Str::uuid() . '.' . $image->getClientOriginalExtension();  // Unique image name
-            $image->move(public_path('images/users'), $imageName);  // Store image in public/images/users
-
-            // Save the path to the user's profile picture
+            $imageName = Str::uuid() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('images/users'), $imageName);
             $user->profile_picture = '/images/users/' . $imageName;
         }
 
-
-
-        // Save the updated user data
         if ($user->save()) {
+            // Log profile update activity
+            ActivityLog::create([
+                'user_id'    => $user->id,
+                'action_type'=> 'profile_update',
+                'description'=> 'User updated profile successfully.',
+                'ip_address' => request()->ip(),
+            ]);
             return response()->json(['success' => 'Profile updated successfully!'], 200);
         } else {
             return response()->json(['error' => 'Failed to update profile'], 500);
@@ -137,34 +149,43 @@ class AdminController extends Controller
         $user = Auth::user();
         $userDetails = User::with(['role', 'workingGroup'])->find($user->id);
         $selectedUser = User::with(['role', 'workingGroup'])->find($userId);
+
+        // Log edit user view activity
+        ActivityLog::create([
+            'user_id'    => $user->id,
+            'action_type'=> 'edit_user_view',
+            'description'=> 'Admin is viewing edit form for user ID: ' . $userId,
+            'ip_address' => request()->ip(),
+        ]);
+
         return Inertia::render('admin/useredit', [
-            'userDetails' => $userDetails,
+            'userDetails'  => $userDetails,
             'selectedUser' => $selectedUser,
-            'selectedID' => $userId,
+            'selectedID'   => $userId,
         ]);
     }
 
     public function updateUser(Request $request, $userID)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . $userID . ',id',
-            'phone_number' => 'required|string|max:20',
-            'description' => 'nullable|string|max:1000',
-            'newPassword' => 'nullable|string|min:6|confirmed',
+            'name'            => 'required|string|max:255',
+            'email'           => 'required|email|max:255|unique:users,email,' . $userID . ',id',
+            'phone_number'    => 'required|string|max:20',
+            'description'     => 'nullable|string|max:1000',
+            'newPassword'     => 'nullable|string|min:6|confirmed',
             'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $user = User::find($userID);
-
         if (!$user) {
             return response()->json(['error' => 'User not found'], 404);
         }
 
-        $user->name = $validated['name'];
-        $user->email = $validated['email'];
+        // Update user details
+        $user->name         = $validated['name'];
+        $user->email        = $validated['email'];
         $user->phone_number = $validated['phone_number'] ?? $user->phone_number;
-        $user->description = $validated['description'] ?? $user->description;
+        $user->description  = $validated['description'] ?? $user->description;
 
         if (!empty($validated['newPassword'])) {
             $user->password = Hash::make($validated['newPassword']);
@@ -174,7 +195,6 @@ class AdminController extends Controller
             if ($user->profile_picture && file_exists(public_path('images/users/' . basename($user->profile_picture)))) {
                 unlink(public_path('images/users/' . basename($user->profile_picture)));
             }
-
             $image = $request->file('profile_picture');
             $imageName = Str::uuid() . '.' . $image->getClientOriginalExtension();
             $image->move(public_path('images/users'), $imageName);
@@ -182,6 +202,13 @@ class AdminController extends Controller
         }
 
         if ($user->save()) {
+            // Log user update activity
+            ActivityLog::create([
+                'user_id'    => Auth::id(),
+                'action_type'=> 'user_update',
+                'description'=> 'Admin updated user ID: ' . $userID,
+                'ip_address' => request()->ip(),
+            ]);
             return response()->json(['success' => 'User updated successfully!'], 200);
         } else {
             return response()->json(['error' => 'Failed to update user'], 500);
@@ -190,15 +217,12 @@ class AdminController extends Controller
 
     public function assignWorkingGroup(Request $request, $id)
     {
-        // Validate that working_group_id is either null or exists in the working_groups table
         $validatedData = $request->validate([
             'working_group_id' => 'nullable|exists:working_groups,id',
         ]);
 
-        // Retrieve the user by id
         $user = User::findOrFail($id);
 
-        // Check if the working group assignment is changing
         if ($user->working_group_id == $validatedData['working_group_id']) {
             if ($request->wantsJson()) {
                 return response()->json([
@@ -211,22 +235,17 @@ class AdminController extends Controller
 
         try {
             $oldGroupId = $user->working_group_id;
-
-            // Update the user's working group assignment using Eloquent's update
             $user->update([
                 'working_group_id' => $validatedData['working_group_id']
             ]);
 
-            // // Log the working group change for auditing purposes
-            // WorkingGroupLog::create([
-            //     'user_id'              => $user->id,
-            //     'old_working_group_id' => $oldGroupId,
-            //     'new_working_group_id' => $user->working_group_id,
-            //     'changed_by'           => auth()->id(),
-            // ]);
-
-            // // Fire an event for further processing (like notifications)
-            // event(new UserWorkingGroupUpdated($user));
+            // Log working group update activity
+            ActivityLog::create([
+                'user_id'    => Auth::id(),
+                'action_type'=> 'working_group_update',
+                'description'=> 'Updated working group for user ID: ' . $id . ' from group ' . ($oldGroupId ?? 'none') . ' to group ' . ($validatedData['working_group_id'] ?? 'none'),
+                'ip_address' => request()->ip(),
+            ]);
 
             if ($request->wantsJson()) {
                 return response()->json([
@@ -239,29 +258,24 @@ class AdminController extends Controller
             return back()->with('success', 'Working group updated successfully.');
         } catch (\Exception $e) {
             Log::error('Error updating working group for user ID ' . $user->id . ': ' . $e->getMessage());
-
             if ($request->wantsJson()) {
                 return response()->json([
                     'status'  => 'error',
                     'message' => 'Failed to update working group. Please try again later.',
                 ], 500);
             }
-
             return back()->withErrors('Failed to update working group. Please try again later.');
         }
     }
 
     public function updateStatus(Request $request, $id)
     {
-        // Validate that status is one of the allowed values
         $validatedData = $request->validate([
             'status' => 'required|in:active,inactive,suspended',
         ]);
 
-        // Retrieve the user by id
         $user = User::findOrFail($id);
 
-        // Check if the status assignment is changing
         if ($user->status == $validatedData['status']) {
             if ($request->wantsJson()) {
                 return response()->json([
@@ -274,10 +288,16 @@ class AdminController extends Controller
 
         try {
             $oldStatus = $user->status;
-
-            // Update the user's status using Eloquent's update
             $user->update([
                 'status' => $validatedData['status']
+            ]);
+
+            // Log status update activity
+            ActivityLog::create([
+                'user_id'    => Auth::id(),
+                'action_type'=> 'status_update',
+                'description'=> 'Updated status for user ID: ' . $id . ' from ' . $oldStatus . ' to ' . $validatedData['status'],
+                'ip_address' => request()->ip(),
             ]);
 
             if ($request->wantsJson()) {
@@ -287,21 +307,50 @@ class AdminController extends Controller
                     'user'    => $user,
                 ], 200);
             }
-
             return back()->with('success', 'User status updated successfully.');
         } catch (\Exception $e) {
             Log::error('Error updating status for user ID ' . $user->id . ': ' . $e->getMessage());
-
             if ($request->wantsJson()) {
                 return response()->json([
                     'status'  => 'error',
                     'message' => 'Failed to update user status. Please try again later.',
                 ], 500);
             }
-
             return back()->withErrors('Failed to update user status. Please try again later.');
         }
     }
 
+    public function deleteUser(Request $request, $id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            $user->delete();
 
+            // Log deletion activity
+            ActivityLog::create([
+                'user_id'    => Auth::id(),
+                'action_type'=> 'user_deletion',
+                'description'=> 'Admin deleted user ID: ' . $id,
+                'ip_address' => request()->ip(),
+            ]);
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status'  => 'success',
+                    'message' => 'User deleted successfully.',
+                ], 200);
+            }
+
+            return back()->with('success', 'User deleted successfully.');
+        } catch (\Exception $e) {
+            Log::error("Error deleting user ID $id: " . $e->getMessage());
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Failed to delete user. Please try again later.',
+                ], 500);
+            }
+            return back()->withErrors('Failed to delete user. Please try again later.');
+        }
+    }
 }

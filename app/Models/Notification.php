@@ -9,15 +9,19 @@ class Notification extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['user_id', 'role', 'message', 'status'];
+    protected $fillable = [
+        'title',
+        'message',
+        'type',
+        'is_global',
+        'target_type', // New targeting column
+        'target_id',   // New targeting column
+    ];
 
-    public function admins()
+    public function users()
     {
-        return $this->belongsToMany(User::class, 'admin_notifications');
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
+        return $this->belongsToMany(User::class, 'notification_user')
+                    ->withPivot('status', 'read_at')
+                    ->withTimestamps();
     }
 }

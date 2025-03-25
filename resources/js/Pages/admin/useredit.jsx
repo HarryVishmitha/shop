@@ -325,12 +325,13 @@ const useredit = ({ userDetails, selectedUser , selectedID}) => {
                                         </div>
                                     </div>
                                     <div className="d-flex align-items-center justify-content-center gap-3">
-                                        <button
+                                        <Link
                                             type="button"
                                             className="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-56 py-11 radius-8"
+                                            href={route('admin.users')}
                                         >
                                             Cancel
-                                        </button>
+                                        </Link>
                                         <button
                                             type="submit"
                                             className="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8"

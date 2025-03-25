@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-use Illuminate\Database\Eloquent\Model;
+
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -17,7 +17,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'working_group_id',  // New field
-        'status',             // New field
+        'status',            // New field
         'phone_number',
         'profile_picture',
     ];
@@ -27,15 +27,13 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'working_group_id' => 'integer', // Ensure it's cast as an integer
-            'status' => 'string', 
-        ];
-    }
+    // Use the standard property for casting attributes.
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password'          => 'hashed',
+        'working_group_id'  => 'integer', // Ensure it's cast as an integer
+        'status'            => 'string',
+    ];
 
     /**
      * Send the email verification notification.
@@ -44,8 +42,14 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function sendEmailVerificationNotification()
     {
-        $this->notify(new CustomVerifyEmail);  // Use the custom notification
+        $this->notify(new CustomVerifyEmail);
     }
+
+    /**
+     * Define the relationship with the Role model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function role()
     {
         return $this->belongsTo(Role::class);
@@ -59,5 +63,19 @@ class User extends Authenticatable implements MustVerifyEmail
     public function workingGroup()
     {
         return $this->belongsTo(WorkingGroup::class);
+    }
+
+    /**
+     * Define the relationship with our custom notifications using the pivot table 'notification_user'.
+     *
+     * Note: We name this relationship "customNotifications" to avoid conflict with Laravel's default notifications.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function customNotifications()
+    {
+        return $this->belongsToMany(\App\Models\Notification::class, 'notification_user')
+                    ->withPivot('status', 'read_at')
+                    ->withTimestamps();
     }
 }

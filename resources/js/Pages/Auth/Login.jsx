@@ -113,7 +113,7 @@ export default function Login({ status, canResetPassword }) {
                         </form>
 
                         <div className="mt-1 tw-pb-12 tw-text-center">
-                            <p>Currently, you can't register on us but if you're our old customer you can login.</p>
+                            <p>Not a user? <span className='tw-text-blue-500'><Link href={route('register')}>Register</Link></span></p>
                         </div>
                     </div>
                 </div>

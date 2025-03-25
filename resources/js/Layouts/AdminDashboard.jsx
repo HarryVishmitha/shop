@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, NavLink } from "react-router-dom";
 import ThemeToggleButton from "../helper/ThemeToggleButton";
 import Cookies from 'js-cookie';
+import axios from 'axios';
 import 'bootstrap/dist/js/bootstrap.bundle';
 
 const AdminDashboard = ({ children, userDetails }) => {
@@ -13,6 +14,7 @@ const AdminDashboard = ({ children, userDetails }) => {
     const currentYear = new Date().getFullYear(); // Get the current year
     const [theme, setTheme] = useState('light'); // Initialize theme state
     const { url, component } = usePage();
+    const [notifications, setNotifications] = useState([]);
 
     useEffect(() => {
 
@@ -146,6 +148,23 @@ document.addEventListener("DOMContentLoaded", openActiveDropdown);
         }
     }, [mobileMenu]);
 
+    useEffect(() => {
+        const fetchNotifications = async () => {
+          try {
+            const { data } = await axios.get('/admin/api/notifications');
+            setNotifications(data.notifications);
+          } catch (e) {
+            console.error('Unable to fetch notifications', e);
+          }
+        };
+      
+        fetchNotifications();
+        const interval = setInterval(fetchNotifications, 30000); // every 30s
+      
+        return () => clearInterval(interval);
+    }, []);
+      
+
     return (
         <>
             <section className={mobileMenu ? "overlay active" : "overlay "}>
@@ -196,45 +215,23 @@ document.addEventListener("DOMContentLoaded", openActiveDropdown);
                                 className={url === '/admin/dashboard' ? 'active-page' : ''}
                             >
                                 <Icon
-                                icon='solar:home-smile-angle-outline'
-                                className='menu-icon'
+                                    icon='solar:home-smile-angle-outline'
+                                    className='menu-icon'
                                 />
                                 <span>Dashboard</span>
                             </Link>
                         </li>
-
-                        <li className='sidebar-menu-group-title'>User Management</li>
-                        {/* Users Dropdown */}
-                        <li className='dropdown'>
-                            <Link href='#'>
+                        <li className='mb-3'>
+                            <Link
+                                href='/admin/users'
+                                className={url === '/admin/users' ? 'active-page' : ''}
+                            >
                                 <Icon
-                                icon='flowbite:users-group-outline'
-                                className='menu-icon'
+                                    icon='flowbite:users-group-outline'
+                                    className='menu-icon'
                                 />
-                                <span>Users</span>
+                                <span>System Users</span>
                             </Link>
-                            <ul className='sidebar-submenu'>
-                                <li>
-                                <Link
-                                    href='/admin/users'
-                                    className={url === '/admin/users' ? 'active-page' : ''}
-                                >
-                                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                                    All Users
-                                </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        to='/add-user'
-                                        className={(navData) =>
-                                        navData.isActive ? "active-page" : ""
-                                        }
-                                    >
-                                        <i className='ri-circle-fill circle-icon text-info-main w-auto' />{" "}
-                                        Add User
-                                    </Link>
-                                </li>
-                            </ul>
                         </li>
 
                         {/* Role & Access Dropdown */}
@@ -325,192 +322,6 @@ document.addEventListener("DOMContentLoaded", openActiveDropdown);
                     <div className='d-flex flex-wrap align-items-center gap-3'>
                         {/* ThemeToggleButton */}
                         <ThemeToggleButton />
-
-                        <div className='dropdown'>
-                        <button
-                            className='has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center'
-                            type='button'
-                            data-bs-toggle='dropdown'
-                        >
-                            <Icon
-                            icon='mage:email'
-                            className='text-primary-light text-xl'
-                            />
-                        </button>
-                        <div className='dropdown-menu to-top dropdown-menu-lg p-0'>
-                            <div className='m-16 py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2'>
-                            <div>
-                                <h6 className='text-lg text-primary-light fw-semibold mb-0'>
-                                Message
-                                </h6>
-                            </div>
-                            <span className='text-primary-600 fw-semibold text-lg w-40-px h-40-px rounded-circle bg-base d-flex justify-content-center align-items-center'>
-                                05
-                            </span>
-                            </div>
-                            <div className='max-h-400-px overflow-y-auto scroll-sm pe-4'>
-                            <Link
-                                to='#'
-                                className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between'
-                            >
-                                <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                                <span className='w-40-px h-40-px rounded-circle flex-shrink-0 position-relative'>
-                                    <img
-                                    src='/assets/images/notification/profile-3.png'
-                                    alt=''
-                                    />
-                                    <span className='w-8-px h-8-px bg-success-main rounded-circle position-absolute end-0 bottom-0' />
-                                </span>
-                                <div>
-                                    <h6 className='text-md fw-semibold mb-4'>
-                                    Kathryn Murphy
-                                    </h6>
-                                    <p className='mb-0 text-sm text-secondary-light text-w-100-px'>
-                                    hey! there i’m...
-                                    </p>
-                                </div>
-                                </div>
-                                <div className='d-flex flex-column align-items-end'>
-                                <span className='text-sm text-secondary-light flex-shrink-0'>
-                                    12:30 PM
-                                </span>
-                                <span className='mt-4 text-xs text-base w-16-px h-16-px d-flex justify-content-center align-items-center bg-warning-main rounded-circle'>
-                                    8
-                                </span>
-                                </div>
-                            </Link>
-                            <Link
-                                to='#'
-                                className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between'
-                            >
-                                <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                                <span className='w-40-px h-40-px rounded-circle flex-shrink-0 position-relative'>
-                                    <img
-                                    src='/assets/images/notification/profile-4.png'
-                                    alt=''
-                                    />
-                                    <span className='w-8-px h-8-px  bg-neutral-300 rounded-circle position-absolute end-0 bottom-0' />
-                                </span>
-                                <div>
-                                    <h6 className='text-md fw-semibold mb-4'>
-                                    Kathryn Murphy
-                                    </h6>
-                                    <p className='mb-0 text-sm text-secondary-light text-w-100-px'>
-                                    hey! there i’m...
-                                    </p>
-                                </div>
-                                </div>
-                                <div className='d-flex flex-column align-items-end'>
-                                <span className='text-sm text-secondary-light flex-shrink-0'>
-                                    12:30 PM
-                                </span>
-                                <span className='mt-4 text-xs text-base w-16-px h-16-px d-flex justify-content-center align-items-center bg-warning-main rounded-circle'>
-                                    2
-                                </span>
-                                </div>
-                            </Link>
-                            <Link
-                                to='#'
-                                className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between bg-neutral-50'
-                            >
-                                <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                                <span className='w-40-px h-40-px rounded-circle flex-shrink-0 position-relative'>
-                                    <img
-                                    src='/assets/images/notification/profile-5.png'
-                                    alt=''
-                                    />
-                                    <span className='w-8-px h-8-px bg-success-main rounded-circle position-absolute end-0 bottom-0' />
-                                </span>
-                                <div>
-                                    <h6 className='text-md fw-semibold mb-4'>
-                                    Kathryn Murphy
-                                    </h6>
-                                    <p className='mb-0 text-sm text-secondary-light text-w-100-px'>
-                                    hey! there i’m...
-                                    </p>
-                                </div>
-                                </div>
-                                <div className='d-flex flex-column align-items-end'>
-                                <span className='text-sm text-secondary-light flex-shrink-0'>
-                                    12:30 PM
-                                </span>
-                                <span className='mt-4 text-xs text-base w-16-px h-16-px d-flex justify-content-center align-items-center bg-neutral-400 rounded-circle'>
-                                    0
-                                </span>
-                                </div>
-                            </Link>
-                            <Link
-                                to='#'
-                                className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between bg-neutral-50'
-                            >
-                                <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                                <span className='w-40-px h-40-px rounded-circle flex-shrink-0 position-relative'>
-                                    <img
-                                    src='/assets/images/notification/profile-6.png'
-                                    alt=''
-                                    />
-                                    <span className='w-8-px h-8-px bg-neutral-300 rounded-circle position-absolute end-0 bottom-0' />
-                                </span>
-                                <div>
-                                    <h6 className='text-md fw-semibold mb-4'>
-                                    Kathryn Murphy
-                                    </h6>
-                                    <p className='mb-0 text-sm text-secondary-light text-w-100-px'>
-                                    hey! there i’m...
-                                    </p>
-                                </div>
-                                </div>
-                                <div className='d-flex flex-column align-items-end'>
-                                <span className='text-sm text-secondary-light flex-shrink-0'>
-                                    12:30 PM
-                                </span>
-                                <span className='mt-4 text-xs text-base w-16-px h-16-px d-flex justify-content-center align-items-center bg-neutral-400 rounded-circle'>
-                                    0
-                                </span>
-                                </div>
-                            </Link>
-                            <Link
-                                to='#'
-                                className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between'
-                            >
-                                <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                                <span className='w-40-px h-40-px rounded-circle flex-shrink-0 position-relative'>
-                                    <img
-                                    src='/assets/images/notification/profile-7.png'
-                                    alt=''
-                                    />
-                                    <span className='w-8-px h-8-px bg-success-main rounded-circle position-absolute end-0 bottom-0' />
-                                </span>
-                                <div>
-                                    <h6 className='text-md fw-semibold mb-4'>
-                                    Kathryn Murphy
-                                    </h6>
-                                    <p className='mb-0 text-sm text-secondary-light text-w-100-px'>
-                                    hey! there i’m...
-                                    </p>
-                                </div>
-                                </div>
-                                <div className='d-flex flex-column align-items-end'>
-                                <span className='text-sm text-secondary-light flex-shrink-0'>
-                                    12:30 PM
-                                </span>
-                                <span className='mt-4 text-xs text-base w-16-px h-16-px d-flex justify-content-center align-items-center bg-warning-main rounded-circle'>
-                                    8
-                                </span>
-                                </div>
-                            </Link>
-                            </div>
-                            <div className='text-center py-12 px-16'>
-                            <Link
-                                to='#'
-                                className='text-primary-600 fw-semibold text-md'
-                            >
-                                See All Message
-                            </Link>
-                            </div>
-                        </div>
-                        </div>
-                        {/* Message dropdown end */}
                         <div className='dropdown'>
                         <button
                             className='has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center'
@@ -530,125 +341,31 @@ document.addEventListener("DOMContentLoaded", openActiveDropdown);
                                 </h6>
                             </div>
                             <span className='text-primary-600 fw-semibold text-lg w-40-px h-40-px rounded-circle bg-base d-flex justify-content-center align-items-center'>
-                                05
+                                {notifications.length}
                             </span>
                             </div>
                             <div className='max-h-400-px overflow-y-auto scroll-sm pe-4'>
-                            <Link
-                                to='#'
-                                className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between'
-                            >
-                                <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                                <span className='w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0'>
-                                    <Icon
-                                    icon='bitcoin-icons:verify-outline'
-                                    className='icon text-xxl'
-                                    />
-                                </span>
-                                <div>
-                                    <h6 className='text-md fw-semibold mb-4'>
-                                    Congratulations
-                                    </h6>
-                                    <p className='mb-0 text-sm text-secondary-light text-w-200-px'>
-                                    Your profile has been Verified. Your profile has
-                                    been Verified
-                                    </p>
-                                </div>
-                                </div>
-                                <span className='text-sm text-secondary-light flex-shrink-0'>
-                                23 Mins ago
-                                </span>
-                            </Link>
-                            <Link
-                                to='#'
-                                className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between bg-neutral-50'
-                            >
-                                <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                                <span className='w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0'>
-                                    <img
-                                    src='/assets/images/notification/profile-1.png'
-                                    alt=''
-                                    />
-                                </span>
-                                <div>
-                                    <h6 className='text-md fw-semibold mb-4'>
-                                    Ronald Richards
-                                    </h6>
-                                    <p className='mb-0 text-sm text-secondary-light text-w-200-px'>
-                                    You can stitch between artboards
-                                    </p>
-                                </div>
-                                </div>
-                                <span className='text-sm text-secondary-light flex-shrink-0'>
-                                23 Mins ago
-                                </span>
-                            </Link>
-                            <Link
-                                to='#'
-                                className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between'
-                            >
-                                <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                                <span className='w-44-px h-44-px bg-info-subtle text-info-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0'>
-                                    AM
-                                </span>
-                                <div>
-                                    <h6 className='text-md fw-semibold mb-4'>
-                                    Arlene McCoy
-                                    </h6>
-                                    <p className='mb-0 text-sm text-secondary-light text-w-200-px'>
-                                    Invite you to prototyping
-                                    </p>
-                                </div>
-                                </div>
-                                <span className='text-sm text-secondary-light flex-shrink-0'>
-                                23 Mins ago
-                                </span>
-                            </Link>
-                            <Link
-                                to='#'
-                                className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between bg-neutral-50'
-                            >
-                                <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                                <span className='w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0'>
-                                    <img
-                                    src='/assets/images/notification/profile-2.png'
-                                    alt=''
-                                    />
-                                </span>
-                                <div>
-                                    <h6 className='text-md fw-semibold mb-4'>
-                                    Annette Black
-                                    </h6>
-                                    <p className='mb-0 text-sm text-secondary-light text-w-200-px'>
-                                    Invite you to prototyping
-                                    </p>
-                                </div>
-                                </div>
-                                <span className='text-sm text-secondary-light flex-shrink-0'>
-                                23 Mins ago
-                                </span>
-                            </Link>
-                            <Link
-                                to='#'
-                                className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between'
-                            >
-                                <div className='text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'>
-                                <span className='w-44-px h-44-px bg-info-subtle text-info-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0'>
-                                    DR
-                                </span>
-                                <div>
-                                    <h6 className='text-md fw-semibold mb-4'>
-                                    Darlene Robertson
-                                    </h6>
-                                    <p className='mb-0 text-sm text-secondary-light text-w-200-px'>
-                                    Invite you to prototyping
-                                    </p>
-                                </div>
-                                </div>
-                                <span className='text-sm text-secondary-light flex-shrink-0'>
-                                23 Mins ago
-                                </span>
-                            </Link>
+                                {notifications.length
+                                    ? notifications.map(n => (
+                                        <Link
+                                        key={n.id}
+                                        to='#'
+                                        className='px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between'
+                                        >
+                                        <div className='d-flex gap-3'>
+                                            <Icon icon='bitcoin-icons:verify-outline' className='icon text-xxl' />
+                                            <div>
+                                            <h6 className='fw-semibold mb-1'>{n.title}</h6>
+                                            <p className='text-sm mb-0'>{n.message}</p>
+                                            </div>
+                                        </div>
+                                        <span className='text-sm text-secondary-light'>
+                                            {new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                        </Link>
+                                    ))
+                                    : <div className='px-24 py-12 text-center'>No notifications</div>
+                                }
                             </div>
                             <div className='text-center py-12 px-16'>
                             <Link
