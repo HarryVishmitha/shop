@@ -243,7 +243,8 @@ document.addEventListener("DOMContentLoaded", openActiveDropdown);
                             <ul className='sidebar-submenu'>
                                 <li>
                                 <Link
-                                    to='/role-access'
+                                    href={route('admin.roles')}
+                                    to='/roles'
                                     className={(navData) =>
                                     navData.isActive ? "active-page" : ""
                                     }

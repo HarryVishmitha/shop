@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use App\Models\WorkingGroup;
 use App\Models\DailyCustomer;
 use App\Models\ActivityLog;
@@ -353,4 +354,144 @@ class AdminController extends Controller
             return back()->withErrors('Failed to delete user. Please try again later.');
         }
     }
+
+    public function roles()
+    {
+        $roles = Role::all();
+
+        // Log roles view activity
+        ActivityLog::create([
+            'user_id'    => Auth::id(),
+            'action_type'=> 'roles_view',
+            'description'=> 'Admin viewed roles list.',
+            'ip_address' => request()->ip(),
+        ]);
+
+        return Inertia::render('admin/roles', [
+            'roles'       => $roles,
+            'userDetails' => Auth::user(),
+        ]);
+    }
+
+    public function storeRole(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'name'        => 'required|string|max:255|unique:roles,name',
+                'description' => 'nullable|string|max:1000',
+            ], [
+                'name.required'        => 'Role name is required.',
+                'name.string'          => 'Role name must be a string.',
+                'name.max'             => 'Role name cannot exceed 255 characters.',
+                'name.unique'          => 'This role name already exists.',
+                'description.string'   => 'Description must be a string.',
+                'description.max'      => 'Description cannot exceed 1000 characters.',
+            ]);
+
+            $role = Role::create([
+                'name'        => $validated['name'],
+                'description' => $validated['description'] ?? null,
+            ]);
+
+            // Log role creation activity
+            ActivityLog::create([
+                'user_id'    => Auth::id(),
+                'action_type'=> 'role_creation',
+                'description'=> 'Admin created a new role: ' . $role->name,
+                'ip_address' => $request->ip(),
+            ]);
+
+            return response()->json([
+                'success' => 'Role created successfully!',
+                'role'    => $role
+            ], 201);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed.',
+                'details' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error("Error creating role: " . $e->getMessage());
+            return response()->json(['error' => 'Failed to create role. Please try again later.'], 500);
+        }
+    }
+
+    public function updateRole(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'name'        => 'required|string|max:255|unique:roles,name,' . $id,
+                'description' => 'nullable|string|max:1000',
+            ], [
+                'name.required'        => 'Role name is required.',
+                'name.string'          => 'Role name must be a string.',
+                'name.max'             => 'Role name cannot exceed 255 characters.',
+                'name.unique'          => 'This role name already exists.',
+                'description.string'   => 'Description must be a string.',
+                'description.max'      => 'Description cannot exceed 1000 characters.',
+            ]);
+
+            $role = Role::findOrFail($id);
+
+            // Store old data for logging purposes
+            $oldData = $role->getOriginal();
+
+            $role->name        = $validated['name'];
+            $role->description = $validated['description'] ?? null;
+
+            if ($role->save()) {
+                // Log role update activity with old and new values
+                ActivityLog::create([
+                    'user_id'    => Auth::id(),
+                    'action_type'=> 'role_update',
+                    'description'=> 'Admin updated role ID: ' . $id . 
+                                    '. Old Name: ' . $oldData['name'] . ', New Name: ' . $role->name,
+                    'ip_address' => $request->ip(),
+                ]);
+
+                return response()->json([
+                    'success' => 'Role updated successfully!',
+                    'role'    => $role
+                ], 200);
+            } else {
+                return response()->json(['error' => 'Failed to update role.'], 500);
+            }
+        } catch (ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed.',
+                'details' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error("Error updating role ID $id: " . $e->getMessage());
+            return response()->json(['error' => 'Failed to update role. Please try again later.'], 500);
+        }
+    }
+
+    public function deleteRole(Request $request, $id)
+    {
+        try {
+            $role = Role::findOrFail($id);
+
+            // Store role name for logging purposes
+            $roleName = $role->name;
+
+            $role->delete();
+
+            // Log role deletion activity
+            ActivityLog::create([
+                'user_id'    => Auth::id(),
+                'action_type'=> 'role_deletion',
+                'description'=> 'Admin deleted role ID: ' . $id . ', Role Name: ' . $roleName,
+                'ip_address' => $request->ip(),
+            ]);
+
+            return response()->json(['success' => 'Role deleted successfully!'], 200);
+
+        } catch (\Exception $e) {
+            Log::error("Error deleting role ID $id: " . $e->getMessage());
+            return response()->json(['error' => 'Failed to delete role. Please try again later.'], 500);
+        }
+    }
+
 }
