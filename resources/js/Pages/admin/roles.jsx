@@ -6,7 +6,6 @@ import { Icon } from "@iconify/react";
 import CookiesV from '@/Components/CookieConsent';
 import Alert from "@/Components/Alert";
 
-
 const Roles = ({ userDetails, roles }) => {
   const queryParams = new URLSearchParams(window.location.search);
   const initialPerPage = queryParams.get("perPage") || 10;
@@ -24,6 +23,10 @@ const Roles = ({ userDetails, roles }) => {
   const [editingRole, setEditingRole] = useState(null); // { id, name, description }
   const [editingErrors, setEditingErrors] = useState({}); // Errors for edit role
   const [editingLoading, setEditingLoading] = useState(false);
+
+  // State for delete feature
+  const [selectedRoleId, setSelectedRoleId] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -64,7 +67,7 @@ const Roles = ({ userDetails, roles }) => {
   if (!rolesList || rolesList.length === 0) {
     return (
       <>
-        <Head title="Admin Dashboard" />
+        <Head title="Roles - Admin Dashboard" />
         <AdminDashboard userDetails={userDetails}>
           <Breadcrumb title="Roles & Access" />
           <div className="card h-100 p-0 radius-12">
@@ -149,7 +152,7 @@ const Roles = ({ userDetails, roles }) => {
     setEditingErrors({});
   };
 
-  // Edit Role Submit Handler remains the same.
+  // Edit Role Submit Handler
   const handleEditRoleSubmit = (e) => {
     e.preventDefault();
     if (!editingRole) return;
@@ -178,7 +181,28 @@ const Roles = ({ userDetails, roles }) => {
       }
     );
   };
-  
+
+  // Delete feature functions
+  const openDeleteModal = (roleId) => {
+    setSelectedRoleId(roleId);
+  };
+
+  const handleRoleDelete = () => {
+    setDeleteLoading(true);
+    router.delete(`/admin/api/roles/${selectedRoleId}`, {
+      preserveState: true,
+      onSuccess: () => {
+        setAlert({ type: "success", message: "Role deleted successfully." });
+      },
+      onError: () => {
+        setAlert({ type: "danger", message: "Failed to delete role. Please try again later." });
+      },
+      onFinish: () => {
+        setDeleteLoading(false);
+        document.querySelector('#deleteModal .btn-close').click();
+      }
+    });
+  };
 
   return (
     <>
@@ -279,6 +303,9 @@ const Roles = ({ userDetails, roles }) => {
                           <button
                             type="button"
                             className="remove-item-btn bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteModal"
+                            onClick={() => openDeleteModal(role.id)}
                           >
                             <Icon icon="fluent:delete-24-regular" className="menu-icon" />
                           </button>
@@ -469,6 +496,36 @@ const Roles = ({ userDetails, roles }) => {
                     </div>
                   </div>
                 </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Delete Role Modal */}
+        <div className="modal fade" id="deleteModal" tabIndex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h1 className="modal-title fs-5 text-red-500" id="deleteModalLabel">Are you sure?</h1>
+                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div className="modal-body font-light">
+                <p>Do you really want to delete this role? This process cannot be undone.</p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button
+                  type="button"
+                  className="btn btn-outline-danger"
+                  onClick={handleRoleDelete}
+                  disabled={deleteLoading}
+                >
+                  {deleteLoading ? (
+                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  ) : (
+                    "Delete Role"
+                  )}
+                </button>
               </div>
             </div>
           </div>

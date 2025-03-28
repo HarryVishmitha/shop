@@ -15,6 +15,7 @@ use Illuminate\Validation\ValidationException;
 use App\Models\WorkingGroup;
 use App\Models\DailyCustomer;
 use App\Models\ActivityLog;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -426,11 +427,200 @@ class AdminController extends Controller
     
     public function updateRole(Request $request, $id)
     {
+        // Validate the incoming data; ignore the current role when checking for uniqueness.
+        $validated = $request->validate([
+            'name'        => 'required|string|max:255|unique:roles,name,' . $id,
+            'description' => 'nullable|string|max:1000',
+        ], [
+            'name.required' => 'The role name is required.',
+            'name.unique'   => 'This role already exists. Please choose a different name.',
+        ]);
 
+        try {
+            // Retrieve the role or fail with a 404.
+            $role = Role::findOrFail($id);
+
+            // Update the role's fields.
+            $role->name = $validated['name'];
+            $role->description = $validated['description'] ?? null;
+
+            // Save the changes.
+            $role->save();
+
+            // Optionally log this activity.
+            $adminId = Auth::id() ?: 0;
+            ActivityLog::create([
+                'user_id'     => $adminId,
+                'action_type' => 'role_updated',
+                'description' => 'Admin updated role: ' . $role->name,
+                'ip_address'  => $request->ip(),
+            ]);
+
+            // Return a JSON response if requested.
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status'  => 'success',
+                    'message' => 'Role updated successfully.',
+                ], 200);
+            }
+
+            return back()->with('success', 'Role updated successfully.');
+        } catch (\Exception $e) {
+            Log::error("Error updating role: " . $e->getMessage());
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Failed to update role. Please try again later.',
+                ], 500);
+            }
+
+            return back()->withErrors('Failed to update role. Please try again later.');
+        }
     }
+
 
     public function deleteRole(Request $request, $id)
     {
-
+        try {
+            // Retrieve the role or throw a ModelNotFoundException if it doesn't exist.
+            $role = Role::findOrFail($id);
+            $roleName = $role->name;
+            
+            // Delete the role from the database.
+            $role->delete();
+            
+            // Log the deletion activity (if using an activity log).
+            $adminId = Auth::id() ?: 0;
+            ActivityLog::create([
+                'user_id'     => $adminId,
+                'action_type' => 'role_deleted',
+                'description' => 'Admin deleted role: ' . $roleName,
+                'ip_address'  => $request->ip(),
+            ]);
+            
+            // Return a JSON response if requested.
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status'  => 'success',
+                    'message' => 'Role deleted successfully.'
+                ], 200);
+            }
+            
+            // Otherwise, redirect back with a success message.
+            return back()->with('success', 'Role deleted successfully.');
+        } catch (\Exception $e) {
+            // Log the error for debugging.
+            Log::error("Error deleting role: " . $e->getMessage());
+            
+            // Return a JSON error response if requested.
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Failed to delete role. Please try again later.'
+                ], 500);
+            }
+            
+            // Otherwise, redirect back with an error message.
+            return back()->withErrors('Failed to delete role. Please try again later.');
+        }
     }
+
+    public function assignRole(Request $request)
+    {
+        // Get query parameters
+        $perPage = $request->input('perPage', 10);
+        $search = $request->input('search', '');
+        $status = $request->input('status', '');
+
+        // Build the base query with the necessary relationships
+        $query = User::with(['role', 'workingGroup']);
+
+        // Apply search filtering if a search term is provided
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                ->orWhere('email', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Apply status filtering if a status is provided
+        if (!empty($status)) {
+            $query->where('status', $status);
+        }
+
+        // Retrieve paginated users and append query parameters for pagination links
+        $users = $query->paginate($perPage)
+                    ->appends($request->query());
+
+        // Retrieve all roles
+        $roles = Role::all();
+
+        // Log the activity for viewing the assign roles list
+        ActivityLog::create([
+            'user_id'     => Auth::id(),
+            'action_type' => 'Assign_roles_view',
+            'description' => 'Admin viewed assign roles list.',
+            'ip_address'  => $request->ip(),
+        ]);
+
+        // Render the Inertia view, passing roles, paginated users, and user details.
+        return Inertia::render('admin/assignrole', [
+            'roles'       => $roles,
+            'users'       => $users,
+            'userDetails' => Auth::user(),
+        ]);
+    }
+
+    public function updateUserRole(Request $request)
+    {
+        // // Optional: Ensure the authenticated user is authorized to update roles.
+        // $this->authorize('updateRole', User::class);
+
+        // Validate the incoming request parameters.
+        $validated = $request->validate([
+            'userId' => 'required|exists:users,id',
+            'roleId' => 'required|exists:roles,id',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            // Retrieve the user record.
+            $user = User::findOrFail($validated['userId']);
+            $oldRoleId = $user->role_id;
+
+            // Check if the new role is different from the current role.
+            if ($oldRoleId == $validated['roleId']) {
+                return redirect()->back()->with('info', 'User already has the selected role.');
+            }
+
+            // Update the user's role.
+            $user->role_id = $validated['roleId'];
+            $user->save();
+
+            // Log the role update activity with detailed information.
+            ActivityLog::create([
+                'user_id'     => Auth::id(),
+                'action_type' => 'Assign_role_update',
+                'description' => "Admin updated role for user: {$user->name} from role id {$oldRoleId} to {$validated['roleId']}",
+                'ip_address'  => $request->ip(),
+            ]);
+
+            // // Optionally fire an event to handle additional actions (e.g., notifying the user).
+            // event(new RoleUpdated($user, $oldRoleId, $validated['roleId']));
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'User role updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Log the error details for debugging.
+            Log::error('Failed to update user role: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Failed to update user role.');
+        }
+    }
+
 }

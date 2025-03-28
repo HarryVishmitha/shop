@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { useState, useEffect } from 'react';
 import { useLocation, NavLink } from "react-router-dom";
@@ -256,6 +256,7 @@ document.addEventListener("DOMContentLoaded", openActiveDropdown);
                                 <li>
                                 <Link
                                     to='/assign-role'
+                                    href={route('admin.assignRole')}
                                     className={(navData) =>
                                     navData.isActive ? "active-page" : ""
                                     }
