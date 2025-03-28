@@ -267,18 +267,30 @@ document.addEventListener("DOMContentLoaded", openActiveDropdown);
                                 </li>
                             </ul>
                         </li>
+                        <li className='mb-3'>
+                            <Link
+                                href='/testimonials'
+                                className={(navData) => (navData.isActive ? "active-page" : "")}
+                            >
+                                <Icon
+                                icon='mage:message-question-mark-round'
+                                className='menu-icon'
+                                />
+                                <span>Working Groups</span>
+                            </Link>
+                        </li>
                         <li>
-              <Link
-                href='/testimonials'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon
-                  icon='mage:message-question-mark-round'
-                  className='menu-icon'
-                />
-                <span>Testimonials</span>
-              </Link>
-            </li>
+                            <Link
+                                href='/testimonials'
+                                className={(navData) => (navData.isActive ? "active-page" : "")}
+                            >
+                                <Icon
+                                icon='mage:message-question-mark-round'
+                                className='menu-icon'
+                                />
+                                <span>Testimonials</span>
+                            </Link>
+                        </li>
                     </ul>
                 </div>
             </aside>
