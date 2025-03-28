@@ -15738,7 +15738,7 @@ td.fc-header-center {
 [multiple],
 textarea,
 select {
-    background-color: transparent !important;
+  background-color: transparent !important;
 }
 .active, .page-link.active {
     z-index: 0 !important;

@@ -31,3 +31,21 @@ body {
     transform: translateX(120%);
     transition: opacity 0.3s ease-in, transform 0.3s ease-in;
 }
+
+[type='text'],
+[type='email'],
+[type='url'],
+[type='password'],
+[type='number'],
+[type='date'],
+[type='datetime-local'],
+[type='month'],
+[type='search'],
+[type='tel'],
+[type='time'],
+[type='week'],
+[multiple],
+textarea,
+select {
+  background-color: transparent !important;
+}

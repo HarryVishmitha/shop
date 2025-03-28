@@ -6,6 +6,7 @@ import { Icon } from "@iconify/react";
 import CookiesV from '@/Components/CookieConsent';
 import Alert from "@/Components/Alert";
 
+
 const Roles = ({ userDetails, roles }) => {
   const queryParams = new URLSearchParams(window.location.search);
   const initialPerPage = queryParams.get("perPage") || 10;
@@ -16,8 +17,13 @@ const Roles = ({ userDetails, roles }) => {
   const [alert, setAlert] = useState(null); // { type: 'success' | 'danger', message: string }
   const [newRoleName, setNewRoleName] = useState('');
   const [newDescription, setNewDescription] = useState('');
-  const [errors, setErrors] = useState({}); // Field-specific errors
+  const [errors, setErrors] = useState({}); // Errors for add role
   const [loading, setLoading] = useState(false);
+
+  // States for editing a role
+  const [editingRole, setEditingRole] = useState(null); // { id, name, description }
+  const [editingErrors, setEditingErrors] = useState({}); // Errors for edit role
+  const [editingLoading, setEditingLoading] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -105,10 +111,11 @@ const Roles = ({ userDetails, roles }) => {
     return pages;
   };
 
+  // Add Role Submit Handler
   const handleAddRoleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
-    setErrors({}); // Reset errors
+    setErrors({}); // Reset add role errors
 
     router.post(
       route('admin.storeRole'),
@@ -118,10 +125,12 @@ const Roles = ({ userDetails, roles }) => {
       },
       {
         preserveState: true,
-        onSuccess: (page) => {
+        onSuccess: () => {
           setNewRoleName('');
           setNewDescription('');
-          setAlert({ type: 'success', message: 'Role Added successfully' });
+          setAlert({ type: 'success', message: 'Role added successfully' });
+          // Close the add modal
+          document.querySelector('#exampleModal .btn-close').click();
         },
         onError: (errors) => {
           setErrors(errors);
@@ -134,6 +143,42 @@ const Roles = ({ userDetails, roles }) => {
     );
   };
 
+  // Simplified edit click: only set the editing role state.
+  const handleEditClick = (role) => {
+    setEditingRole({ id: role.id, name: role.name, description: role.description });
+    setEditingErrors({});
+  };
+
+  // Edit Role Submit Handler remains the same.
+  const handleEditRoleSubmit = (e) => {
+    e.preventDefault();
+    if (!editingRole) return;
+    setEditingLoading(true);
+    setEditingErrors({});
+    router.patch(
+      route('admin.updateRole', editingRole.id),
+      {
+        name: editingRole.name,
+        description: editingRole.description,
+      },
+      {
+        preserveState: true,
+        onSuccess: () => {
+          setAlert({ type: 'success', message: 'Role updated successfully' });
+          // Close the edit modal using Bootstrap's data API
+          document.querySelector('#editRolemodel .btn-close').click();
+        },
+        onError: (errors) => {
+          setEditingErrors(errors);
+          setAlert({ type: 'danger', message: 'Failed to update role' });
+        },
+        onFinish: () => {
+          setEditingLoading(false);
+        },
+      }
+    );
+  };
+  
 
   return (
     <>
@@ -225,6 +270,9 @@ const Roles = ({ userDetails, roles }) => {
                           <button
                             type="button"
                             className="bg-success-focus text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editRolemodel"
+                            onClick={() => handleEditClick(role)}
                           >
                             <Icon icon="lucide:edit" className="menu-icon" />
                           </button>
@@ -340,7 +388,7 @@ const Roles = ({ userDetails, roles }) => {
                       )}
                     </div>
                     <div className="d-flex align-items-center justify-content-center gap-3 mt-24">
-                      <button type="reset" className="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8">
+                      <button type="reset" className="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8" data-bs-dismiss="modal" aria-label="Close">
                         Cancel
                       </button>
                       <button type="submit" className="btn btn-primary border border-primary-600 text-md px-48 py-12 radius-8" disabled={loading}>
@@ -357,6 +405,75 @@ const Roles = ({ userDetails, roles }) => {
             </div>
           </div>
         </div>
+
+        {/* Edit Role Modal */}
+        <div className="modal fade" id="editRolemodel" tabIndex={-1} aria-labelledby="editRoleModalLabel" aria-hidden="true">
+          <div className="modal-dialog modal-lg modal-dialog-centered">
+            <div className="modal-content radius-16 bg-base">
+              <div className="modal-header py-16 px-24 border-0">
+                <h5 className="modal-title fs-5" id="editRoleModalLabel">
+                  Edit Role
+                </h5>
+                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" />
+              </div>
+              <div className="modal-body p-24">
+                <form onSubmit={handleEditRoleSubmit}>
+                  <div className="row">
+                    <div className="col-12 mb-20">
+                      <label className="form-label fw-semibold text-primary-light text-sm mb-8">
+                        Role Name
+                      </label>
+                      <input
+                        type="text"
+                        className={`form-control radius-8 ${editingErrors.name ? 'is-invalid' : ''}`}
+                        placeholder="Enter Role Name"
+                        value={editingRole ? editingRole.name : ''}
+                        onChange={(e) => setEditingRole({ ...editingRole, name: e.target.value })}
+                        required
+                      />
+                      {editingErrors.name && (
+                        <div className="invalid-feedback">
+                          {Array.isArray(editingErrors.name) ? editingErrors.name[0] : editingErrors.name}
+                        </div>
+                      )}
+                    </div>
+                    <div className="col-12 mb-20">
+                      <label htmlFor="desc" className="form-label fw-semibold text-primary-light text-sm mb-8">
+                        Description
+                      </label>
+                      <textarea
+                        className={`form-control ${editingErrors.description ? 'is-invalid' : ''}`}
+                        id="desc"
+                        rows={4}
+                        placeholder="Write some text"
+                        value={editingRole ? editingRole.description : ''}
+                        onChange={(e) => setEditingRole({ ...editingRole, description: e.target.value })}
+                      />
+                      {editingErrors.description && (
+                        <div className="invalid-feedback">
+                          {Array.isArray(editingErrors.description) ? editingErrors.description[0] : editingErrors.description}
+                        </div>
+                      )}
+                    </div>
+                    <div className="d-flex align-items-center justify-content-center gap-3 mt-24">
+                      <button type="reset" className="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-40 py-11 radius-8" data-bs-dismiss="modal" aria-label="Close">
+                        Cancel
+                      </button>
+                      <button type="submit" className="btn btn-primary border border-primary-600 text-md px-48 py-12 radius-8" disabled={editingLoading}>
+                        {editingLoading ? (
+                          <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        ) : (
+                          "Save"
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </AdminDashboard>
       <CookiesV />
     </>
