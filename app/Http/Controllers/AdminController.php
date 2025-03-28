@@ -424,7 +424,7 @@ class AdminController extends Controller
         }
     }
 
-    
+
     public function updateRole(Request $request, $id)
     {
         // Validate the incoming data; ignore the current role when checking for uniqueness.
@@ -486,10 +486,10 @@ class AdminController extends Controller
             // Retrieve the role or throw a ModelNotFoundException if it doesn't exist.
             $role = Role::findOrFail($id);
             $roleName = $role->name;
-            
+
             // Delete the role from the database.
             $role->delete();
-            
+
             // Log the deletion activity (if using an activity log).
             $adminId = Auth::id() ?: 0;
             ActivityLog::create([
@@ -498,7 +498,7 @@ class AdminController extends Controller
                 'description' => 'Admin deleted role: ' . $roleName,
                 'ip_address'  => $request->ip(),
             ]);
-            
+
             // Return a JSON response if requested.
             if ($request->wantsJson()) {
                 return response()->json([
@@ -506,13 +506,13 @@ class AdminController extends Controller
                     'message' => 'Role deleted successfully.'
                 ], 200);
             }
-            
+
             // Otherwise, redirect back with a success message.
             return back()->with('success', 'Role deleted successfully.');
         } catch (\Exception $e) {
             // Log the error for debugging.
             Log::error("Error deleting role: " . $e->getMessage());
-            
+
             // Return a JSON error response if requested.
             if ($request->wantsJson()) {
                 return response()->json([
@@ -520,7 +520,7 @@ class AdminController extends Controller
                     'message' => 'Failed to delete role. Please try again later.'
                 ], 500);
             }
-            
+
             // Otherwise, redirect back with an error message.
             return back()->withErrors('Failed to delete role. Please try again later.');
         }
@@ -621,6 +621,13 @@ class AdminController extends Controller
 
             return redirect()->back()->with('error', 'Failed to update user role.');
         }
+    }
+
+    public function workingGroups()
+    {
+        return Inertia::render('admin/workingGroups', [
+            'userDetails' => Auth::user(),
+        ]);
     }
 
 }

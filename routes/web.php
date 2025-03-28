@@ -51,6 +51,8 @@ Route::middleware(['auth', 'verified', CheckRole::class . ':admin'])->prefix('ad
     Route::delete('/api/roles/{id}', [AdminController::class, 'deleteRole'])->name('deleteRole');
     Route::get('/assign-role', [AdminController::class, 'assignRole'])->name('assignRole');
     Route::patch('/api/assign-role', [AdminController::class, 'updateUserRole'])->name('storeAssignRole');
+    Route::get('/working-groups', [AdminController::class, 'workingGroups'])->name('workingGroups');
+    
 
     // Add more admin routes here
 });

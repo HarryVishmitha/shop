@@ -157,13 +157,13 @@ document.addEventListener("DOMContentLoaded", openActiveDropdown);
             console.error('Unable to fetch notifications', e);
           }
         };
-      
+
         fetchNotifications();
         const interval = setInterval(fetchNotifications, 30000); // every 30s
-      
+
         return () => clearInterval(interval);
     }, []);
-      
+
 
     return (
         <>
@@ -245,9 +245,7 @@ document.addEventListener("DOMContentLoaded", openActiveDropdown);
                                 <Link
                                     href={route('admin.roles')}
                                     to='/roles'
-                                    className={(navData) =>
-                                    navData.isActive ? "active-page" : ""
-                                    }
+                                    className={url === '/admin/roles' ? 'active-page' : ''}
                                 >
                                     <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
                                     Role &amp; Access
@@ -257,9 +255,7 @@ document.addEventListener("DOMContentLoaded", openActiveDropdown);
                                 <Link
                                     to='/assign-role'
                                     href={route('admin.assignRole')}
-                                    className={(navData) =>
-                                    navData.isActive ? "active-page" : ""
-                                    }
+                                    className={url === '/admin/assign-role' ? 'active-page' : ''}
                                 >
                                     <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
                                     Assign Role
@@ -269,11 +265,12 @@ document.addEventListener("DOMContentLoaded", openActiveDropdown);
                         </li>
                         <li className='mb-3'>
                             <Link
-                                href='/testimonials'
-                                className={(navData) => (navData.isActive ? "active-page" : "")}
+                                to='/admin/working-groups'
+                                href={route('admin.workingGroups')}
+                                className={url === '/admin/working-groups' ? 'active-page' : ''}
                             >
                                 <Icon
-                                icon='mage:message-question-mark-round'
+                                icon='lucide:network'
                                 className='menu-icon'
                                 />
                                 <span>Working Groups</span>
