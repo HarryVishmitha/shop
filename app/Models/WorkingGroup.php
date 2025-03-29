@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +12,8 @@ class WorkingGroup extends Model
     protected $fillable = [
         'name',
         'description',
+        'wg_image',
+        'status',
     ];
 
     public function users()

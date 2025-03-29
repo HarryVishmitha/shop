@@ -625,9 +625,23 @@ class AdminController extends Controller
 
     public function workingGroups()
     {
+        // Retrieve working groups with the count of related users
+        $workingGroups = WorkingGroup::withCount('users')->get();
+
+        // Log the activity
+        ActivityLog::create([
+            'user_id'     => Auth::id(),
+            'action_type' => 'working_groups_view',
+            'description' => 'Admin viewed working groups list.',
+            'ip_address'  => request()->ip(),
+        ]);
+
+        // Render the Inertia view, passing working groups and user details.
         return Inertia::render('admin/workingGroups', [
-            'userDetails' => Auth::user(),
+            'userDetails'    => Auth::user(),
+            'workingGroups'  => $workingGroups,
         ]);
     }
+
 
 }
