@@ -658,5 +658,19 @@ class AdminController extends Controller
         ]);
     }
 
+    public function addWs()
+    {
+
+    }
+
+    public function editWs()
+    {
+
+    }
+
+    public function deleteWs()
+    {
+
+    }
 
 }
