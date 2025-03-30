@@ -187,12 +187,19 @@ const Roles = ({ userDetails, roles }) => {
     setSelectedRoleId(roleId);
   };
 
+  // Updated delete handler: if the current page contains only one role and it's not the first page,
+  // redirect to the previous page.
   const handleRoleDelete = () => {
     setDeleteLoading(true);
     router.delete(`/admin/api/roles/${selectedRoleId}`, {
       preserveState: true,
       onSuccess: () => {
-        setAlert({ type: "success", message: "Role deleted successfully." });
+        if (rolesList.length === 1 && currentPage > 1) {
+          router.visit(`${path}?page=${currentPage - 1}&perPage=${perPage}`);
+          setAlert({ type: "success", message: "Role deleted successfully." });
+        } else {
+          setAlert({ type: "success", message: "Role deleted successfully." });
+        }
       },
       onError: () => {
         setAlert({ type: "danger", message: "Failed to delete role. Please try again later." });

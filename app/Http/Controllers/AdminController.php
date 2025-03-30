@@ -623,23 +623,38 @@ class AdminController extends Controller
         }
     }
 
-    public function workingGroups()
+    public function workingGroups(Request $request)
     {
-        // Retrieve working groups with the count of related users
-        $workingGroups = WorkingGroup::withCount('users')->get();
+        // Get the per-page value from the query string, defaulting to 10 if not provided.
+        $perPage = $request->query('perPage', 10);
+        // Optionally filter by status if provided.
+        $status = $request->query('status');
 
-        // Log the activity
+        // Build the query with the count of related users.
+        $query = WorkingGroup::withCount('users');
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        // Optionally order by created_at descending.
+        $query->orderBy('created_at', 'desc');
+
+        // Retrieve paginated results and append existing query parameters to pagination links.
+        $workingGroups = $query->paginate($perPage)->withQueryString();
+
+        // Log the activity.
         ActivityLog::create([
             'user_id'     => Auth::id(),
             'action_type' => 'working_groups_view',
             'description' => 'Admin viewed working groups list.',
-            'ip_address'  => request()->ip(),
+            'ip_address'  => $request->ip(),
         ]);
 
-        // Render the Inertia view, passing working groups and user details.
+        // Render the Inertia view, passing paginated working groups and user details.
         return Inertia::render('admin/workingGroups', [
-            'userDetails'    => Auth::user(),
-            'workingGroups'  => $workingGroups,
+            'userDetails'   => Auth::user(),
+            'workingGroups' => $workingGroups,
         ]);
     }
 

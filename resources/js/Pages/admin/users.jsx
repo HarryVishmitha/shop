@@ -21,6 +21,10 @@ const Users = ({ users, userDetails, status: selectedStatus, workingGroups }) =>
   const [alert, setAlert] = useState(null); // { type: 'success'|'danger', message: string }
   const [showUserModal, setShowUserModal] = useState(false);
 
+  // Loading states for asynchronous actions
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [updateLoading, setUpdateLoading] = useState(false);
+
   // When the selected user changes, update the modal inputs
   useEffect(() => {
     if (selectedUser) {
@@ -60,16 +64,26 @@ const Users = ({ users, userDetails, status: selectedStatus, workingGroups }) =>
     setSelectedUser(user);
   };
 
-  // Enhanced delete function
+  // Enhanced delete function: after deletion, if the current page becomes empty and it's not the first page,
+  // redirect the admin to the previous page.
   const handleuserDelete = (userID) => {
     if (window.confirm("Are you sure you want to delete this user? This process cannot be undone.")) {
+      setDeleteLoading(true);
       router.delete(`/admin/api/users/${userID}`, {
         preserveState: true,
         onSuccess: () => {
-          setAlert({ type: "success", message: "User deleted successfully." });
+          // Check if current page only had one record and it's not the first page.
+          if (users.data.length === 1 && users.current_page > 1) {
+            router.visit(`${users.path}?page=${users.current_page - 1}&perPage=${perPage}&status=${status}`);
+          } else {
+            setAlert({ type: "success", message: "User deleted successfully." });
+          }
         },
         onError: () => {
           setAlert({ type: "danger", message: "Failed to delete user. Please try again later." });
+        },
+        onFinish: () => {
+          setDeleteLoading(false);
         }
       });
     }
@@ -85,6 +99,7 @@ const Users = ({ users, userDetails, status: selectedStatus, workingGroups }) =>
 
   // Combined update function: update working group then update status
   const updateUserInfo = (userId) => {
+    setUpdateLoading(true);
     router.patch(`/admin/api/users/${userId}/assign-working-group`,
       { working_group_id: selectedWorkingGroup },
       {
@@ -99,12 +114,16 @@ const Users = ({ users, userDetails, status: selectedStatus, workingGroups }) =>
               },
               onError: () => {
                 setAlert({ type: "danger", message: "Failed to update user status." });
+              },
+              onFinish: () => {
+                setUpdateLoading(false);
               }
             }
           );
         },
         onError: () => {
           setAlert({ type: "danger", message: "Failed to update working group." });
+          setUpdateLoading(false);
         }
       }
     );
@@ -368,9 +387,9 @@ const Users = ({ users, userDetails, status: selectedStatus, workingGroups }) =>
                             onChange={(e) => setSelectedStatusModal(e.target.value)}
                             className="form-select"
                           >
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
-                            <option value="Suspended">Suspended</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="suspended">Suspended</option>
                           </select>
                         </div>
                       </div>
@@ -378,8 +397,13 @@ const Users = ({ users, userDetails, status: selectedStatus, workingGroups }) =>
                         <button
                           className="btn btn-primary"
                           onClick={() => updateUserInfo(selectedUser.id)}
+                          disabled={updateLoading}
                         >
-                          Update
+                          {updateLoading ? (
+                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                          ) : (
+                            "Update"
+                          )}
                         </button>
                       </div>
                     </div>
@@ -405,7 +429,18 @@ const Users = ({ users, userDetails, status: selectedStatus, workingGroups }) =>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" className="btn btn-outline-danger" onClick={() => handleuserDelete(selectedUserId)}>Delete User</button>
+                <button
+                  type="button"
+                  className="btn btn-outline-danger"
+                  onClick={() => handleuserDelete(selectedUserId)}
+                  disabled={deleteLoading}
+                >
+                  {deleteLoading ? (
+                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  ) : (
+                    "Delete User"
+                  )}
+                </button>
               </div>
             </div>
           </div>
