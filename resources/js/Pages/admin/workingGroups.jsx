@@ -109,11 +109,7 @@ const WorkingGroups = ({ userDetails, workingGroups, status: selectedStatus }) =
                     setAlert({ type: "success", message: "Working Group updated successfully." });
                     setErrors({});
                     // Hide modal
-                    const modalEl = document.getElementById('editWG');
-                    const modalInstance = bootstrap.Modal.getInstance(modalEl);
-                    if (modalInstance) {
-                        modalInstance.hide();
-                    }
+                    document.querySelector('#editWG .btn-close').click();
                 },
                 onError: (err) => {
                     setAlert({ type: "danger", message: "Failed to update Working Group." });
@@ -134,11 +130,7 @@ const WorkingGroups = ({ userDetails, workingGroups, status: selectedStatus }) =
                     setAlert({ type: "success", message: "Working Group created successfully." });
                     setErrors({});
                     // Hide modal
-                    const modalEl = document.getElementById('editWG');
-                    const modalInstance = bootstrap.Modal.getInstance(modalEl);
-                    if (modalInstance) {
-                        modalInstance.hide();
-                    }
+                    document.querySelector('#editWG .btn-close').click();
                 },
                 onError: (err) => {
                     setAlert({ type: "danger", message: "Failed to create Working Group." });
@@ -316,7 +308,14 @@ const WorkingGroups = ({ userDetails, workingGroups, status: selectedStatus }) =
                                             <td>{group.users_count || 0}</td>
                                             <td>{group.products_count || 0}</td>
                                             <td className="text-center">
-                                                <span className="bg-success-focus text-success-600 border border-success-main px-24 py-4 radius-4 fw-medium text-sm tw-capitalize">
+                                                <span
+                                                    className={`px-24 py-4 radius-4 fw-medium text-sm tw-capitalize ${group.status === 'active'
+                                                            ? 'bg-success-focus text-success-600 border border-success-main'
+                                                            : group.status === 'inactive'
+                                                                ? 'bg-danger-focus text-danger-600 border border-danger-main'
+                                                                : 'bg-warning-focus text-warning-600 border border-warning-main'
+                                                        }`}
+                                                >
                                                     {group.status}
                                                 </span>
                                             </td>
@@ -331,12 +330,13 @@ const WorkingGroups = ({ userDetails, workingGroups, status: selectedStatus }) =
                                                     >
                                                         <Icon icon="majesticons:eye-line" className="icon text-xl" />
                                                     </button>
-                                                    <button
+                                                    <Link
                                                         type="button"
                                                         className="bg-success-focus text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
+                                                        href={`/admin/manage/${group.id}/working-group`}
                                                     >
                                                         <Icon icon="lucide:edit" className="menu-icon" />
-                                                    </button>
+                                                    </Link>
                                                 </div>
                                             </td>
                                         </tr>

@@ -276,6 +276,32 @@ const AdminDashboard = ({ children, userDetails }) => {
                                     <span>Working Groups</span>
                                 </Link>
                             </li>
+                            <li className='dropdown'>
+                                <Link href={route('admin.users')}>
+                                    <Icon icon='fluent-mdl2:product-variant' className='menu-icon' />
+                                    <span>Products</span>
+                                </Link>
+                                <ul className='sidebar-submenu'>
+                                    <li>
+                                        <Link
+                                            href={route('admin.addProduct')}
+                                            className={url === '/admin/add-new-product' ? 'active-page' : ''}
+                                        >
+                                            <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
+                                            Add new product
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link
+                                            href={route('admin.products')}
+                                            className={url === '/admin/products' ? 'active-page' : ''}
+                                        >
+                                            <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
+                                            All products
+                                        </Link>
+                                    </li>
+                                </ul>
+                            </li>
                             <li>
                                 <Link
                                     href='/testimonials'

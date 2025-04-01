@@ -53,8 +53,10 @@ Route::middleware(['auth', 'verified', CheckRole::class . ':admin'])->prefix('ad
     Route::patch('/api/assign-role', [AdminController::class, 'updateUserRole'])->name('storeAssignRole');
     Route::get('/working-groups', [AdminController::class, 'workingGroups'])->name('workingGroups');
     Route::post('/api/working-groups', [AdminController::class, 'addWs'])->name('addWS');
-    Route::patch('api/working-groups/{id}/edit', [AdminController::class, 'editWs'])->name('editWS');
-
+    Route::patch('/api/working-groups/{id}/edit', [AdminController::class, 'editWs'])->name('editWS');
+    Route::get('/manage/{id}/working-group', [AdminController::class, 'manageWs'])->name('manageWS');
+    Route::get('/products', [AdminController::class, 'products'])->name('products');
+    Route::get('/add-new-product', [AdminController::class, 'addProduct'])->name('addProduct');
     // Add more admin routes here
 });
 

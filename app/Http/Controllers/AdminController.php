@@ -791,4 +791,58 @@ class AdminController extends Controller
             return back()->withErrors(['error' => 'Failed to update Working Group. ' . $e->getMessage()]);
         }
     }
+
+    public function manageWs(Request $request, $id)
+    {
+        // Retrieve the working group along with its assigned users.
+        $workingGroup = WorkingGroup::with('users')->findOrFail($id);
+
+        // Log the activity for viewing the working group details.
+        ActivityLog::create([
+            'user_id'     => Auth::id(),
+            'action_type' => 'working_group_detail_view',
+            'description' => 'Admin viewed working group details for group ID: ' . $id,
+            'ip_address'  => $request->ip(),
+        ]);
+
+        // Render the Inertia view, passing paginated working groups and user details.
+        return Inertia::render('admin/ws/details', [
+            'userDetails'   => Auth::user(),
+            'workingGroup' => $workingGroup,
+
+        ]);
+    }
+
+    public function products()
+    {
+
+        // Log the activity for viewing the products list.
+        ActivityLog::create([
+            'user_id'     => Auth::id(),
+            'action_type' => 'products_view',
+            'description' => 'Admin viewed products list.',
+            'ip_address'  => request()->ip(),
+        ]);
+
+        // Render the Inertia view for products.
+        return Inertia::render('admin/productsView', [
+            'userDetails' => Auth::user(),
+        ]);
+    }
+
+    public function addProduct()
+    {
+        // Log the activity for viewing the add product page.
+        ActivityLog::create([
+            'user_id'     => Auth::id(),
+            'action_type' => 'add_product_view',
+            'description' => 'Admin viewed add product page.',
+            'ip_address'  => request()->ip(),
+        ]);
+
+        // Render the Inertia view for adding a new product.
+        return Inertia::render('admin/addProduct', [
+            'userDetails' => Auth::user(),
+        ]);
+    }
 }
