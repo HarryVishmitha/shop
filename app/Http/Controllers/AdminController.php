@@ -16,6 +16,9 @@ use App\Models\WorkingGroup;
 use App\Models\DailyCustomer;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\DB;
+use FFI\Exception;
+
+use function Illuminate\Log\log;
 
 class AdminController extends Controller
 {
@@ -30,7 +33,8 @@ class AdminController extends Controller
         }
     }
 
-    public function index() {
+    public function index()
+    {
         // Get total number of users
         $totalUsers = User::count();
         $adminUsers = User::where('role_id', Role::where('name', 'admin')->first()->id)->count();
@@ -41,8 +45,8 @@ class AdminController extends Controller
         // Log dashboard access activity
         ActivityLog::create([
             'user_id'    => Auth::id(),
-            'action_type'=> 'dashboard_access',
-            'description'=> 'Admin accessed dashboard.',
+            'action_type' => 'dashboard_access',
+            'description' => 'Admin accessed dashboard.',
             'ip_address' => request()->ip(),
         ]);
 
@@ -56,15 +60,16 @@ class AdminController extends Controller
         ]);
     }
 
-    public function profile() {
+    public function profile()
+    {
         $user = Auth::user();
         $userDetails = User::with(['role', 'workingGroup'])->find($user->id);
 
         // Log profile view activity
         ActivityLog::create([
             'user_id'    => $user->id,
-            'action_type'=> 'profile_view',
-            'description'=> 'Admin viewed profile.',
+            'action_type' => 'profile_view',
+            'description' => 'Admin viewed profile.',
             'ip_address' => request()->ip(),
         ]);
 
@@ -73,7 +78,8 @@ class AdminController extends Controller
         ]);
     }
 
-    public function users(Request $request) {
+    public function users(Request $request)
+    {
         $perPage = $request->input('perPage', 10); // Default to 10 per page
         $status = $request->input('status'); // Optional status filter
 
@@ -89,15 +95,15 @@ class AdminController extends Controller
         // Log user list view activity
         ActivityLog::create([
             'user_id'    => Auth::id(),
-            'action_type'=> 'users_list_view',
-            'description'=> 'Admin viewed user list with filter status: ' . ($status ?? 'none'),
+            'action_type' => 'users_list_view',
+            'description' => 'Admin viewed user list with filter status: ' . ($status ?? 'none'),
             'ip_address' => request()->ip(),
         ]);
 
         return Inertia::render('admin/users', [
             'users'        => $users,
             'userDetails'  => Auth::user(),
-            'workingGroups'=> $workingGroups,
+            'workingGroups' => $workingGroups,
             'status'       => $status
         ]);
     }
@@ -142,8 +148,8 @@ class AdminController extends Controller
             // Log profile update activity
             ActivityLog::create([
                 'user_id'    => $user->id,
-                'action_type'=> 'profile_update',
-                'description'=> 'User updated profile successfully.',
+                'action_type' => 'profile_update',
+                'description' => 'User updated profile successfully.',
                 'ip_address' => request()->ip(),
             ]);
             return response()->json(['success' => 'Profile updated successfully!'], 200);
@@ -161,8 +167,8 @@ class AdminController extends Controller
         // Log edit user view activity
         ActivityLog::create([
             'user_id'    => $user->id,
-            'action_type'=> 'edit_user_view',
-            'description'=> 'Admin is viewing edit form for user ID: ' . $userId,
+            'action_type' => 'edit_user_view',
+            'description' => 'Admin is viewing edit form for user ID: ' . $userId,
             'ip_address' => request()->ip(),
         ]);
 
@@ -213,8 +219,8 @@ class AdminController extends Controller
             // Log user update activity
             ActivityLog::create([
                 'user_id'    => Auth::id(),
-                'action_type'=> 'user_update',
-                'description'=> 'Admin updated user ID: ' . $userID,
+                'action_type' => 'user_update',
+                'description' => 'Admin updated user ID: ' . $userID,
                 'ip_address' => request()->ip(),
             ]);
             return response()->json(['success' => 'User updated successfully!'], 200);
@@ -250,8 +256,8 @@ class AdminController extends Controller
             // Log working group update activity
             ActivityLog::create([
                 'user_id'    => Auth::id(),
-                'action_type'=> 'working_group_update',
-                'description'=> 'Updated working group for user ID: ' . $id . ' from group ' . ($oldGroupId ?? 'none') . ' to group ' . ($validatedData['working_group_id'] ?? 'none'),
+                'action_type' => 'working_group_update',
+                'description' => 'Updated working group for user ID: ' . $id . ' from group ' . ($oldGroupId ?? 'none') . ' to group ' . ($validatedData['working_group_id'] ?? 'none'),
                 'ip_address' => request()->ip(),
             ]);
 
@@ -303,8 +309,8 @@ class AdminController extends Controller
             // Log status update activity
             ActivityLog::create([
                 'user_id'    => Auth::id(),
-                'action_type'=> 'status_update',
-                'description'=> 'Updated status for user ID: ' . $id . ' from ' . $oldStatus . ' to ' . $validatedData['status'],
+                'action_type' => 'status_update',
+                'description' => 'Updated status for user ID: ' . $id . ' from ' . $oldStatus . ' to ' . $validatedData['status'],
                 'ip_address' => request()->ip(),
             ]);
 
@@ -337,8 +343,8 @@ class AdminController extends Controller
             // Log deletion activity
             ActivityLog::create([
                 'user_id'    => Auth::id(),
-                'action_type'=> 'user_deletion',
-                'description'=> 'Admin deleted user ID: ' . $id,
+                'action_type' => 'user_deletion',
+                'description' => 'Admin deleted user ID: ' . $id,
                 'ip_address' => request()->ip(),
             ]);
 
@@ -370,8 +376,8 @@ class AdminController extends Controller
         // Log roles view activity
         ActivityLog::create([
             'user_id'    => Auth::id(),
-            'action_type'=> 'roles_view',
-            'description'=> 'Admin viewed roles list with pagination.',
+            'action_type' => 'roles_view',
+            'description' => 'Admin viewed roles list with pagination.',
             'ip_address' => request()->ip(),
         ]);
 
@@ -544,9 +550,9 @@ class AdminController extends Controller
 
         // Apply search filtering if a search term is provided
         if (!empty($search)) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'LIKE', "%{$search}%")
-                ->orWhere('email', 'LIKE', "%{$search}%");
+                    ->orWhere('email', 'LIKE', "%{$search}%");
             });
         }
 
@@ -557,7 +563,7 @@ class AdminController extends Controller
 
         // Retrieve paginated users and append query parameters for pagination links
         $users = $query->paginate($perPage)
-                    ->appends($request->query());
+            ->appends($request->query());
 
         // Retrieve all roles
         $roles = Role::all();
@@ -664,19 +670,125 @@ class AdminController extends Controller
         ]);
     }
 
-    public function addWs()
+    public function addWs(Request $request)
     {
+        // Validate incoming data.
+        $validated = $request->validate([
+            'name'        => 'required|string|max:255|unique:working_groups,name',
+            'description' => 'nullable|string',
+            'wg_image'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'status'      => 'required|in:active,inactive,inactivating',
+        ], [
+            'name.required' => 'The working group name is required.',
+            'name.unique'   => 'This working group already exists. Please choose a different name.',
+            'image.max'   => 'The image must be less than 2MB.',
+            'image.image' => 'The file must be an image.',
+            'image.mimes' => 'The image must be a file of type: jpg, jpeg, png.',
+            'status.required' => 'The status is required.'
+        ]);
+        try {
 
+            // Process image upload if a file is provided.
+            if ($request->hasFile('wg_image')) {
+                try {
+                    $image = $request->file('wg_image');
+                    $imageName = Str::uuid() . '.' . $image->getClientOriginalExtension();
+                    // Store the file in public/images/working-groups.
+                    $image->move(public_path('images/working-groups'), $imageName);
+                    // Save the public URL of the image.
+                    $validated['wg_image'] = '/images/working-groups/' . $imageName;
+                } catch (\Exception $e) {
+                    // If image upload fails, throw an exception to break the function.
+                    throw new \Exception('Image uploading failed: ' . $e->getMessage());
+                    log::error('Image uploading failed: ' . $e->getMessage());
+                    return redirect()->back()->with('error', 'Image uploading failed: ' . $e->getMessage());
+                }
+            }
+
+            // Create the working group.
+            $workingGroup = WorkingGroup::create($validated);
+
+            // Log the creation activity.
+            ActivityLog::create([
+                'user_id'     => Auth::id(),
+                'action_type' => 'working_group_created',
+                'description' => 'Admin created working group: ' . $workingGroup->name,
+                'ip_address'  => $request->ip(),
+            ]);
+
+            return redirect()->route('admin.workingGroups')
+                ->with('success', 'Working Group created successfully.');
+        } catch (\Exception $e) {
+            Log::error('Error in addWs: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to create working group. Please try again later.');
+        }
     }
 
-    public function editWs()
+
+    public function editWs(Request $request, $id)
     {
+        // STEP 1: Log the incoming request data
+        Log::info('Edit Working Group request received', [
+            'id' => $id,
+            'data' => $request->all()
+        ]);
 
+        try {
+            // STEP 2: Validate incoming request
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'status' => 'required|in:active,inactive,inactivating',
+                'wg_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            ]);
+            Log::info('Validation passed', $validated);
+
+            // STEP 3: Find the Working Group
+            $workingGroup = WorkingGroup::findOrFail($id);
+            Log::info('Working Group found', ['working_group' => $workingGroup]);
+
+            // STEP 4: Update fields
+            $workingGroup->name = $validated['name'];
+            $workingGroup->description = $validated['description'];
+            $workingGroup->status = $validated['status'];
+
+            // STEP 5: Handle image upload
+            if ($request->hasFile('wg_image')) {
+                Log::info('Image file detected');
+
+                // Delete old image
+                if ($workingGroup->wg_image && file_exists(public_path($workingGroup->wg_image))) {
+                    unlink(public_path($workingGroup->wg_image));
+                    Log::info('Old image deleted', ['old_image' => $workingGroup->wg_image]);
+                }
+
+                $image = $request->file('wg_image');
+                $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                $imagePath = public_path('/images/working-groups');
+
+                // Check folder existence
+                if (!file_exists($imagePath)) {
+                    mkdir($imagePath, 0775, true);
+                    Log::info('Uploads directory created');
+                }
+
+                $image->move($imagePath, $imageName);
+                Log::info('New image uploaded', ['image_name' => $imageName]);
+
+                $workingGroup->wg_image = '/images/working-groups/' . $imageName;
+            }
+
+            // STEP 6: Save to DB
+            $workingGroup->save();
+            Log::info('Working Group updated successfully', ['working_group' => $workingGroup]);
+
+            return back()->with('success', 'Working Group updated successfully.');
+        } catch (\Illuminate\Validation\ValidationException $ve) {
+            Log::error('Validation failed', ['errors' => $ve->errors()]);
+            return back()->withErrors($ve->errors());
+        } catch (\Exception $e) {
+            Log::error('Update Working Group failed', ['error' => $e->getMessage()]);
+            return back()->withErrors(['error' => 'Failed to update Working Group. ' . $e->getMessage()]);
+        }
     }
-
-    public function deleteWs()
-    {
-
-    }
-
 }

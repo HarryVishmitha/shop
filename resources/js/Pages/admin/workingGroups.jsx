@@ -15,18 +15,21 @@ const WorkingGroups = ({ userDetails, workingGroups, status: selectedStatus }) =
     const [status, setStatus] = useState(selectedStatus || '');
     const [search, setSearch] = useState('');
 
-    // State for alerts and loading
+    // State for alerts, loading, and error messages
     const [alert, setAlert] = useState(null);
     const [updateLoading, setUpdateLoading] = useState(false);
+    const [errors, setErrors] = useState({});
 
     // State for selected working group for editing and its form data
     const [selectedWG, setSelectedWG] = useState(null);
     const [editData, setEditData] = useState({
         name: '',
         description: '',
-        wg_image: '',
+        wg_image: '', // This holds the preview URL
         status: 'active',
     });
+    // State for the actual file object
+    const [selectedImageFile, setSelectedImageFile] = useState(null);
 
     // When a working group is selected for editing, prepopulate the form fields
     useEffect(() => {
@@ -37,10 +40,27 @@ const WorkingGroups = ({ userDetails, workingGroups, status: selectedStatus }) =
                 wg_image: selectedWG.wg_image || '',
                 status: selectedWG.status || 'active',
             });
+            // Reset file object when editing an existing record.
+            setSelectedImageFile(null);
         }
     }, [selectedWG]);
 
-    // Handle changes in the edit modal inputs
+    // Reset modal details when modal is closed
+    useEffect(() => {
+        const modalEl = document.getElementById('editWG');
+        const handleModalHidden = () => {
+            setSelectedWG(null);
+            setEditData({ name: '', description: '', wg_image: '', status: 'active' });
+            setErrors({});
+            setSelectedImageFile(null);
+        };
+        modalEl?.addEventListener('hidden.bs.modal', handleModalHidden);
+        return () => {
+            modalEl?.removeEventListener('hidden.bs.modal', handleModalHidden);
+        };
+    }, []);
+
+    // Handle changes in the edit modal inputs (for text/radio fields)
     const handleEditChange = (e) => {
         setEditData({
             ...editData,
@@ -48,26 +68,91 @@ const WorkingGroups = ({ userDetails, workingGroups, status: selectedStatus }) =
         });
     };
 
+    // Handle file change for single image upload
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const src = URL.createObjectURL(file);
+            setEditData({ ...editData, wg_image: src });
+            setSelectedImageFile(file);
+        }
+    };
+
     // Update working group details when the form is submitted
     const handleUpdate = (e) => {
         e.preventDefault();
         setUpdateLoading(true);
-        router.patch(route('admin.editWS', selectedWG ? selectedWG.id : ''), editData, {
-            preserveState: true,
-            onSuccess: () => {
-                setAlert({ type: "success", message: "Working Group updated successfully." });
-            },
-            onError: () => {
-                setAlert({ type: "danger", message: "Failed to update Working Group." });
-            },
-            onFinish: () => {
-                setUpdateLoading(false);
-            },
-        });
+
+        // Create a FormData object and append the fields.
+        const formData = new FormData();
+        formData.append('name', editData.name);
+        formData.append('description', editData.description);
+        formData.append('status', editData.status);
+        // Append the image file if one is selected.
+        if (selectedImageFile) {
+            formData.append('wg_image', selectedImageFile);
+        }
+
+        // (For debugging, you can iterate over formData entries if needed)
+        // for (let [key, value] of formData.entries()) {
+        //   console.log(`${key}: ${value}`);
+        // }
+
+        if (selectedWG) {
+
+            formData.append('_method', 'PATCH');
+
+            router.post(`/admin/api/working-groups/${selectedWG.id}/edit`, formData, {
+                preserveState: true,
+                forceFormData: true,
+                onSuccess: () => {
+                    setAlert({ type: "success", message: "Working Group updated successfully." });
+                    setErrors({});
+                    // Hide modal
+                    const modalEl = document.getElementById('editWG');
+                    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+                },
+                onError: (err) => {
+                    setAlert({ type: "danger", message: "Failed to update Working Group." });
+                    setErrors(err);
+                },
+                onFinish: () => {
+                    setUpdateLoading(false);
+                },
+            });
+
+
+        } else {
+            // Create new working group via POST
+            router.post(route('admin.addWS'), formData, {
+                preserveState: true,
+                forceFormData: true,
+                onSuccess: () => {
+                    setAlert({ type: "success", message: "Working Group created successfully." });
+                    setErrors({});
+                    // Hide modal
+                    const modalEl = document.getElementById('editWG');
+                    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+                },
+                onError: (err) => {
+                    setAlert({ type: "danger", message: "Failed to create Working Group." });
+                    setErrors(err);
+                },
+                onFinish: () => {
+                    setUpdateLoading(false);
+                },
+            });
+        }
     };
 
     // Handle pagination and filtering
-    const handlePerPageChange = (event) => {
+    const handlePerPageChangeFn = (event) => {
         const value = event.target.value;
         setPerPage(value);
         router.visit(`${workingGroups.path}?page=${workingGroups.current_page}&perPage=${value}&status=${status}`);
@@ -112,7 +197,7 @@ const WorkingGroups = ({ userDetails, workingGroups, status: selectedStatus }) =
                             <select
                                 className="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px"
                                 value={perPage}
-                                onChange={handlePerPageChange}
+                                onChange={handlePerPageChangeFn}
                             >
                                 <option value="5">5</option>
                                 <option value="10">10</option>
@@ -145,7 +230,7 @@ const WorkingGroups = ({ userDetails, workingGroups, status: selectedStatus }) =
                                 <option value="inactivating">Inactivating</option>
                             </select>
                         </div>
-                        {/* "Add New Working Group" button opens the modal in add mode (selectedWG null) */}
+                        {/* "Add New Working Group" button opens the modal in add mode */}
                         <button
                             className="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2"
                             data-bs-toggle="modal"
@@ -153,6 +238,8 @@ const WorkingGroups = ({ userDetails, workingGroups, status: selectedStatus }) =
                             onClick={() => {
                                 setSelectedWG(null);
                                 setEditData({ name: '', description: '', wg_image: '', status: 'active' });
+                                setErrors({});
+                                setSelectedImageFile(null);
                             }}
                         >
                             <Icon icon="ic:baseline-plus" className="icon text-xl line-height-1" />
@@ -182,12 +269,8 @@ const WorkingGroups = ({ userDetails, workingGroups, status: selectedStatus }) =
                                         <th scope="col">Description</th>
                                         <th scope="col">Total Users</th>
                                         <th scope="col">Total Products</th>
-                                        <th scope="col" className="text-center">
-                                            Status
-                                        </th>
-                                        <th scope="col" className="text-center">
-                                            Action
-                                        </th>
+                                        <th scope="col" className="text-center">Status</th>
+                                        <th scope="col" className="text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -314,7 +397,7 @@ const WorkingGroups = ({ userDetails, workingGroups, status: selectedStatus }) =
                                 ></button>
                             </div>
                             <div className="modal-body p-24">
-                                <form onSubmit={handleUpdate}>
+                                <form onSubmit={handleUpdate} encType="multipart/form-data">
                                     <div className="row">
                                         <div className="col-12 mb-20">
                                             <label className="form-label fw-semibold text-primary-light text-sm mb-8">
@@ -323,11 +406,12 @@ const WorkingGroups = ({ userDetails, workingGroups, status: selectedStatus }) =
                                             <input
                                                 type="text"
                                                 name="name"
-                                                className="form-control radius-8"
+                                                className={`form-control radius-8 ${errors.name ? 'is-invalid' : ''}`}
                                                 placeholder="Enter Working Group Name"
                                                 value={editData.name}
                                                 onChange={handleEditChange}
                                             />
+                                            {errors.name && <div className="invalid-feedback">{errors.name}</div>}
                                         </div>
                                         <div className="col-12 mb-20">
                                             <label className="form-label fw-semibold text-primary-light text-sm mb-8">
@@ -335,25 +419,57 @@ const WorkingGroups = ({ userDetails, workingGroups, status: selectedStatus }) =
                                             </label>
                                             <textarea
                                                 name="description"
-                                                className="form-control"
+                                                className={`form-control ${errors.description ? 'is-invalid' : ''}`}
                                                 rows={4}
                                                 placeholder="Enter Description"
                                                 value={editData.description}
                                                 onChange={handleEditChange}
                                             />
+                                            {errors.description && <div className="invalid-feedback">{errors.description}</div>}
                                         </div>
                                         <div className="col-12 mb-20">
                                             <label className="form-label fw-semibold text-primary-light text-sm mb-8">
-                                                Image URL
+                                                Image Upload
                                             </label>
-                                            <input
-                                                type="text"
-                                                name="wg_image"
-                                                className="form-control radius-8"
-                                                placeholder="Enter Image URL"
-                                                value={editData.wg_image}
-                                                onChange={handleEditChange}
-                                            />
+                                            <div className="upload-image-wrapper d-flex align-items-center gap-3 flex-wrap">
+                                                <div className="uploaded-img-container position-relative h-120-px w-120-px border input-form-light radius-8 overflow-hidden border-dashed bg-neutral-50">
+                                                    {editData.wg_image ? (
+                                                        <>
+                                                            <img
+                                                                className="w-100 h-100 object-fit-cover"
+                                                                src={editData.wg_image}
+                                                                alt="Uploaded Preview"
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                className="position-absolute top-0 end-0 z-1 text-2xxl line-height-1 me-8 mt-8 d-flex"
+                                                                onClick={() => {
+                                                                    setEditData({ ...editData, wg_image: '' });
+                                                                    setSelectedImageFile(null);
+                                                                }}
+                                                            >
+                                                                <Icon icon="radix-icons:cross-2" className="text-xl text-danger-600" />
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <label
+                                                            className="d-flex align-items-center justify-content-center flex-column h-100 w-100 cursor-pointer"
+                                                            htmlFor="upload-single"
+                                                        >
+                                                            <Icon icon="solar:camera-outline" className="text-xl text-secondary-light" />
+                                                            <span className="fw-semibold text-secondary-light">Upload</span>
+                                                        </label>
+                                                    )}
+                                                    <input
+                                                        id="upload-single"
+                                                        type="file"
+                                                        name="wg_image"
+                                                        hidden
+                                                        onChange={handleFileChange}
+                                                    />
+                                                </div>
+                                            </div>
+                                            {errors.wg_image && <div className="invalid-feedback d-block">{errors.wg_image}</div>}
                                         </div>
                                         <div className="d-flex align-items-center flex-wrap gap-28">
                                             <div className="form-check checked-success d-flex align-items-center gap-2">
