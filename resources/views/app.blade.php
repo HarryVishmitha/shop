@@ -5,21 +5,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="{{ $description ?? 'You think it, We ink it.' }}">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-
-        <!-- Open Graph Meta Tags -->
-        <meta property="og:type" content="website">
-        <meta property="og:title" content="{{ $title ?? 'Printair Advertising' }}">
-        <meta property="og:description" content="{{ $description ?? 'You think it, We ink it.' }}">
-        <meta property="og:image" content="{{ $og_image ?? asset('path/to/default/image.jpg') }}">
-        <meta property="og:url" content="{{ url()->current() }}">
-
-        <!-- Twitter Card Meta Tags -->
-        <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="{{ config('app.name', 'Printair') ?? 'Printair Advertising' }}">
-        <meta name="twitter:description" content="{{ $description ?? 'You think it, We ink it.' }}">
-        <meta name="twitter:image" content="{{ $og_image ?? asset('path/to/default/image.jpg') }}">
-        <meta name="twitter:url" content="{{ url()->current() }}">
-
         <link rel="canonical" href="{{ url()->current() }}">
         <title inertia>{{ config('app.name', 'Printair') }}</title>
 

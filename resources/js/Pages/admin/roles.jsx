@@ -5,6 +5,7 @@ import Breadcrumb from "@/components/Breadcrumb";
 import { Icon } from "@iconify/react";
 import CookiesV from '@/Components/CookieConsent';
 import Alert from "@/Components/Alert";
+import Meta from "@/Components/Metaheads";
 
 const Roles = ({ userDetails, roles }) => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -68,6 +69,7 @@ const Roles = ({ userDetails, roles }) => {
         return (
             <>
                 <Head title="Roles - Admin Dashboard" />
+                <Meta title="Roles - Admin Dashboard"  description='User roles'/>
                 <AdminDashboard userDetails={userDetails}>
                     <Breadcrumb title="Roles & Access" />
                     <div className="card h-100 p-0 radius-12">
@@ -214,6 +216,7 @@ const Roles = ({ userDetails, roles }) => {
     return (
         <>
             <Head title="Roles - Admin Dashboard" />
+            <Meta title="Roles - Admin Dashboard" description='User roles' />
             <AdminDashboard userDetails={userDetails}>
                 <Breadcrumb title="Roles & Access" />
                 {alert && <Alert type={alert.type} message={alert.message} onClose={() => setAlert(null)} />}

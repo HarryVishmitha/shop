@@ -21,7 +21,13 @@ class AdminController extends Controller
 {
     public function __construct()
     {
-        // $this->middleware('auth');
+        $this->middleware('auth');
+        $user = Auth::id();
+        $role_id = User::where('id', $user)->value('role_id');
+        $actype = Role::where('id', $role_id)->value('name');
+        if ($actype != 'admin') {
+            return redirect()->route('home')->with('error', 'You are not authorized to access to that page.');
+        }
     }
 
     public function index() {

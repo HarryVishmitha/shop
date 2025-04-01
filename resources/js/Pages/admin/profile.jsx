@@ -6,6 +6,7 @@ import Breadcrumb from "@/components/Breadcrumb";
 import CookiesV from '@/Components/CookieConsent';
 import axios from 'axios';
 import Alert from '@/Components/Alert';
+import Meta from '@/Components/Metaheads';
 
 const Profile = ({ userDetails }) => {
     const [imagePreview, setImagePreview] = useState(userDetails.profile_picture || '/assets/images/user.png');
@@ -121,6 +122,7 @@ const Profile = ({ userDetails }) => {
     return (
         <>
             <Head title="Admin Dashboard" />
+            <Meta title="Edit Profile" description="Edit your profile information" />
             <AdminDashboard userDetails={userDetails}>
                 <Breadcrumb title="Edit Profile" />
                 <div className="row gy-4">

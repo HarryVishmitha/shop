@@ -5,6 +5,7 @@ import Breadcrumb from "@/components/Breadcrumb";
 import { Icon } from "@iconify/react";
 import CookiesV from '@/Components/CookieConsent';
 import Alert from '@/Components/Alert';
+import Meta from '@/Components/Metaheads';
 
 const AssignRole = ({ userDetails, users, roles }) => {
     // Get initial perPage from query params or default to 10
@@ -55,6 +56,7 @@ const AssignRole = ({ userDetails, users, roles }) => {
     return (
         <>
             <Head title="Assign Roles - Admin Dashboard" />
+            <Meta title='Assign Roles - Admin Dashboard' description='Manage user roles and permissions in the admin dashboard.' />
             <AdminDashboard userDetails={userDetails}>
                 <Breadcrumb title="Roles & Access" />
                 {alert && <Alert type={alert.type} message={alert.message} onClose={() => setAlert(null)} />}

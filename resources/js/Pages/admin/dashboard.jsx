@@ -7,6 +7,7 @@ import { Icon } from "@iconify/react";
 import AdminDashboard from '../../Layouts/AdminDashboard';
 import Breadcrumb from "@/components/Breadcrumb";
 // import Metrics from '@/Components/Metrics';
+import Meta from '@/Components/Metaheads';
 
 const Dashboard = ({ totalUsers, adminUsers, userUsers, workingGroups, dailyCustomers, userDetails }) => {
     const breadcrumbs = [
@@ -16,6 +17,7 @@ const Dashboard = ({ totalUsers, adminUsers, userUsers, workingGroups, dailyCust
     return (
         <>
             <Head title="Admin Dashboard" />
+            <Meta title="Admin Dashboard" description="Admin Dashboard" />
             <AdminDashboard userDetails={userDetails}>
                 <Breadcrumb title="Panels" />
                 {/* adding Metrics */}

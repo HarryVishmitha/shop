@@ -7,6 +7,7 @@ import { Icon } from "@iconify/react";
 import AdminDashboard from '../../Layouts/AdminDashboard';
 import Breadcrumb from "@/components/Breadcrumb";
 import Alert from "@/Components/Alert";
+import Meta from '@/Components/Metaheads';
 
 const Users = ({ users, userDetails, status: selectedStatus, workingGroups }) => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -132,6 +133,7 @@ const Users = ({ users, userDetails, status: selectedStatus, workingGroups }) =>
     return (
         <>
             <Head title="Users - Admin" />
+            <Meta title='Users - Admin' description='Manage users, view details, and update information.' />
             <AdminDashboard userDetails={userDetails}>
                 <Breadcrumb title="All Users" />
                 {/* Display Alert if any */}

@@ -7,6 +7,7 @@ import { Icon } from "@iconify/react";
 import AdminDashboard from '../../Layouts/AdminDashboard';
 import Breadcrumb from "@/components/Breadcrumb";
 import Alert from "@/Components/Alert";
+import Meta from '@/Components/Metaheads';
 
 const useredit = ({ userDetails, selectedUser, selectedID }) => {
     const [imagePreview, setImagePreview] = useState(selectedUser.profile_picture || '/assets/images/user.png');
@@ -117,6 +118,7 @@ const useredit = ({ userDetails, selectedUser, selectedID }) => {
     return (
         <>
             <Head title="Edit - Admin" />
+            <Meta title='Edit User' description='Edit user details and profile image' />
             <AdminDashboard userDetails={userDetails}>
                 <Breadcrumb title="Edit User" />
                 <div className="row gy-4">
